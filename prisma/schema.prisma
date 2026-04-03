@@ -30,6 +30,7 @@ deletedAt DateTime?
   linkedinProfile String?
   companyName     String?
   jurisdiction    String?
+  primaryExpertise String?
   specializations String[] @default([])
   yearsExperience String?
   subscribed_for_waitlist Boolean @default(true)

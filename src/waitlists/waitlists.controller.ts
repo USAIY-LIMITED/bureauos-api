@@ -3,12 +3,14 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { WaitlistsService } from './waitlists.service';
 import { CreateWaitlistDto } from './dto/waitlist.dto';
 import { ApiGatewayGuard } from '@app/core/api-gateway/guards/api-gateway.guard';
+import { Public } from '@app/iam/decorators/public.decorator';
 
 @ApiTags('Waitlists')
 @Controller('waitlists')
 export class WaitlistsController {
   constructor(private readonly waitlistsService: WaitlistsService) {}
 
+  @Public()
   @Post()
   @ApiOperation({ summary: 'Join the BureauOS waitlist' })
   create(@Body() createWaitlistDto: CreateWaitlistDto) {

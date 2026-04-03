@@ -37,6 +37,11 @@ export class CreateWaitlistDto {
   @IsOptional()
   jurisdiction?: string;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  primaryExpertise?: string;
+
   @ApiProperty({ required: false, isArray: true, type: String })
   @IsArray()
   @IsString({ each: true })
