@@ -10,9 +10,16 @@ import { UsersModule } from './users/users.module';
 import { WaitlistsModule } from './waitlists/waitlists.module';
 import { EmailManagementsModule } from './email-managements/email-managements.module';
 
+import appConfig from './core/config/app.config';
+import mailConfig from './core/config/mail.config';
+import swaggerConfig from './core/config/swagger.config';
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig, mailConfig, swaggerConfig],
+    }),
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 100,

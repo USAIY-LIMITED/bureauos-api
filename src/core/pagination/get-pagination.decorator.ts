@@ -55,7 +55,6 @@ export const GetPagination = createParamDecorator(
       skip,
       key,
       dir,
-      limit,
       ...paginationParams,
     };
   },

@@ -21,7 +21,10 @@ export class AccountDatabaseService extends BaseDatabaseService {
     this.model = prisma.account;
   }
 
-  async findAll(filterOptions: any = {}, paginationOptions: any = {}) {
+  async findAll(
+    filterOptions: any = {},
+    paginationOptions: any = {},
+  ): Promise<[any, any]> {
     const queryOptions: any = {};
     const { sortKey, sortDir, type, ...searchOptions } = filterOptions || {};
     const { skip, limit } = paginationOptions || {};
@@ -61,7 +64,7 @@ export class AccountDatabaseService extends BaseDatabaseService {
     ]);
   }
 
-  async create(data: any, tx: Prisma.TransactionClient = null): Promise<Account> {
+  async create(data: any, tx?: Prisma.TransactionClient): Promise<Account> {
     const client = tx || this.prisma;
     const accountType = data.accountType as AccountType;
     const accountTypeRelation = accountType.toLowerCase();

@@ -44,6 +44,7 @@
     "dayjs": "^1.11.20",
     "express-basic-auth": "^1.2.1",
     "handlebars": "^4.7.9",
+    "helmet": "^8.1.0",
     "joi": "^18.1.2",
     "nodemailer": "^8.0.4",
     "passport": "^0.7.0",

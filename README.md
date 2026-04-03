@@ -89,7 +89,10 @@ BureauOS features a premium **Handlebars (.hbs)** email system.
 - **Location**: `src/email-managements/templates/layout.hbs`
 - **Branding**: Official checkmark layout with BureauOS logo.
 
----
+## 🏗️ Current Technical Debt
+- **Sentry Error Tracking**: Currently bypassed in `HttpExceptionFilter`. Requires `npm install @sentry/node` and `SENTRY_URL` configuration for production launch.
+- **Administrative Role-Gating**: Waitlist management is protected by `API-KEY`, but requires a future `RoleGuard` to distinguish between `BUSINESS` and `ADMIN` key owners.
+- **Paystack/Monnify Legacy**: Remaining provider-specific configuration stubs in the Core utilities await final payment provider determination.
 
 ## 📜 License
 BureauOS is [UNLICENSED](LICENSE).

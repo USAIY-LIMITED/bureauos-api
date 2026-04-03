@@ -5,7 +5,6 @@ import { Accounts } from '@app/accounts/decorators/accounts.decorator';
 import { AccountType } from '@prisma/client';
 import { CurrentUser } from '@app/iam/decorators';
 import type { CurrentUserData } from '@app/iam/interfaces';
-import { ApiAccountUpdate } from './decorators';
 import {
   AccountValidationPipe,
   HandlerAction,
@@ -32,7 +31,6 @@ export class AccountProfileController {
   @ApiOperation({
     summary: 'Update Account Profile',
   })
-  @ApiAccountUpdate()
   @Patch()
   async update(
     @Body(AccountValidationPipe(HandlerAction.UPDATE))

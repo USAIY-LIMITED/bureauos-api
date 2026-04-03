@@ -5,19 +5,25 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class EmailManagementsService {
   private transporter;
   private templateLoader;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
+    const mailConfigValues = this.configService.get('mail');
     this.transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: parseInt(process.env.MAIL_PORT || '587', 10),
-      secure: process.env.MAIL_SECURE === 'true',
+      host: mailConfigValues.host,
+      port: mailConfigValues.port,
+      secure: mailConfigValues.secure,
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: mailConfigValues.user,
+        pass: mailConfigValues.pass,
       },
     });
 
@@ -49,8 +55,9 @@ export class EmailManagementsService {
       ...data,
     });
 
+    const mailConfigValues = this.configService.get('mail');
     const mailOptions = {
-      from: process.env.MAIL_FROM || '"BureauOS" <hello@bureauos.space>',
+      from: mailConfigValues.from,
       to,
       subject: template.subject,
       html,

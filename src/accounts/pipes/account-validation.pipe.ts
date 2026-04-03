@@ -14,7 +14,7 @@ export enum HandlerAction {
 
 export const AccountValidationPipe: (
   handlerAction: HandlerAction,
-) => PipeTransform = memoize(createAccountValidationPipe);
+) => any = memoize(createAccountValidationPipe);
 
 function createAccountValidationPipe(handlerAction: HandlerAction) {
   handlerAction = !handlerAction ? HandlerAction.CREATE : handlerAction;
@@ -57,7 +57,7 @@ function createAccountValidationPipe(handlerAction: HandlerAction) {
       if (errors.length > 0) {
         const errMsg = {};
         errors.forEach((err) => {
-          errMsg[err.property] = [...Object.values(err.constraints)];
+          errMsg[err.property] = [...Object.values(err.constraints || {})];
         });
         throw new ValidationException(errMsg);
       }

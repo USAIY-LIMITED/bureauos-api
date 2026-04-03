@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -102,6 +103,7 @@ export class AuthenticationController {
   @ApiResponse({ status: 200, description: 'Password reset link sent' })
   @Post('/forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    if (!forgotPasswordDto.email) throw new BadRequestException('Email required');
     return await this.authService.forgotPassword(forgotPasswordDto.email);
   }
 
