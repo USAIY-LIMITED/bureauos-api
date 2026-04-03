@@ -1,4 +1,8 @@
+import * as dns from 'dns';
 import { NestFactory } from '@nestjs/core';
+
+dns.setDefaultResultOrder('ipv4first');
+
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
