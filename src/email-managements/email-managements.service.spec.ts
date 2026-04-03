@@ -63,7 +63,7 @@ describe('EmailManagementsService', () => {
         subject: 'Hello World',
       }));
       
-      const sentHtml = spySend.mock.calls[0][0].html;
+      const sentHtml = (spySend.mock.calls[0][0] as any).html;
       expect(sentHtml).toContain('Hello World'); // Title from layout
       expect(sentHtml).toContain('Body for Joshua'); // Compiled body
     });
