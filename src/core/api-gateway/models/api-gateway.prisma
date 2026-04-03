@@ -1,0 +1,15 @@
+model ApiGateway {
+  ...boilerplate
+  key         String   @unique
+  slug        String   @unique
+  name        String
+  accountId   Int
+  account     Account  @relation("AccountApiGateways", fields: [accountId], references: [id])
+  
+  rateLimit   Int      @default(100) // requests per minute
+  burstLimit  Int      @default(20)
+  isEnabled   Boolean  @default(true)
+  config      Json?    // For extra authorization configs
+
+  @@index([key, slug, accountId])
+}

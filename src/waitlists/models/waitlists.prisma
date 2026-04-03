@@ -1,0 +1,15 @@
+model Waitlist {
+  ...boilerplate
+  email           String   @unique
+  firstName       String
+  lastName        String
+  userType        AccountType
+  linkedinProfile String?
+  companyName     String?
+  jurisdiction    String?
+  specializations String[] @default([])
+  yearsExperience String?
+  subscribed_for_waitlist Boolean @default(true)
+
+  @@index([email, userType])
+}

@@ -1,0 +1,16 @@
+{
+  "mixers": [
+    {
+      "input": [
+        "prisma/base.prisma",
+        "src/accounts/models/account.prisma",
+        "src/users/models/users.prisma",
+        "src/waitlists/models/waitlists.prisma",
+        "src/base-records/models/base-records.prisma",
+        "src/audit-logs/models/audit-logs.prisma",
+        "src/api-gateway/models/api-gateway.prisma"
+      ],
+      "output": "prisma/schema.prisma"
+    }
+  ]
+}

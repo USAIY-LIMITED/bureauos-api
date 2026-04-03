@@ -1,0 +1,7 @@
+model EmailTemplate {
+  subject String
+  title   String
+  slug    String @unique()
+  body    String @db.Text
+  ...boilerplate
+}

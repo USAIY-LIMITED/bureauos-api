@@ -1,0 +1,12 @@
+model AuditLog {
+  ...boilerplate
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  timestamp DateTime @default(now())
+
+  @@index([userId, action, entity])
+}

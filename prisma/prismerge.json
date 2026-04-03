@@ -1,0 +1,17 @@
+{
+  "mixers": [
+    {
+      "inputs": [
+        "./prisma/base.prisma",
+        "./src/**/*.prisma"
+      ],
+      "output": "./prisma/schema.prisma"
+    }
+  ],
+  "fragments": [
+    {
+      "name": "boilerplate",
+      "path": "./prisma/db-boilerplate.prisma.fragment"
+    }
+  ]
+}

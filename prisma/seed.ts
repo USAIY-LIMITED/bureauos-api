@@ -1,0 +1,127 @@
+import { PrismaClient, AccountType } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('🌱 Seeding BureauOS Ecosystem...');
+
+  // 1. Create Default Email Template
+  const welcomeTemplate = await prisma.emailTemplate.upsert({
+    where: { slug: 'waitlist-welcome' },
+    update: {},
+    create: {
+      slug: 'waitlist-welcome',
+      subject: 'Welcome to BureauOS!',
+      title: 'Success! You is on the Waitlist',
+      body: ` 
+            <h1 style="color: #0f172a; font-size: 30px; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.02em;">
+                You're in — BureauOS Early Access</h1>
+
+            <div style="color: #64748b; font-size: 17px; margin-bottom: 32px; font-weight: 400;">
+                Hi {{firstName}} {{lastName}}, <br/> you've been added to the early access list.
+            </div>
+
+            <div
+                style="background-color: #f0f7ff; border-radius: 20px; padding: 32px; margin-bottom: 32px; border: 1px solid #e0f0ff; text-align: left;">
+                <div
+                    style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <div style="color: #0f172a; font-size: 17px; font-weight: 700; margin-bottom: 10px;">What we're building
+                </div>
+                <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0;">
+                    We're building a structured system for business compliance and cross-border operations — starting
+                    with founders and professionals navigating markets like the UK.
+                </p>
+                <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 14px 0 0 0;">You'll be among the
+                    first to:</p>
+                <ul style="margin: 14px 0 0 0; padding: 0; list-style: none;">
+                    <li
+                        style="display: flex; align-items: flex-start; gap: 10px; color: #475569; font-size: 14px; font-weight: 500; margin-bottom: 10px;">
+                        <span
+                            style="display: inline-block; width: 6px; height: 6px; min-width: 6px; background: #3b82f6; border-radius: 50%; margin-top: 7px;"></span>
+                        Access the platform
+                    </li>
+                    <li
+                        style="display: flex; align-items: flex-start; gap: 10px; color: #475569; font-size: 14px; font-weight: 500; margin-bottom: 10px;">
+                        <span
+                            style="display: inline-block; width: 6px; height: 6px; min-width: 6px; background: #3b82f6; border-radius: 50%; margin-top: 7px;"></span>
+                        Test early workflows
+                    </li>
+                    <li
+                        style="display: flex; align-items: flex-start; gap: 10px; color: #475569; font-size: 14px; font-weight: 500; margin-bottom: 10px;">
+                        <span
+                            style="display: inline-block; width: 6px; height: 6px; min-width: 6px; background: #3b82f6; border-radius: 50%; margin-top: 7px;"></span>
+                        Understand how businesses are structured across jurisdictions
+                    </li>
+                </ul>
+            </div>
+
+            <div style="border-left: 3px solid #e2e8f0; padding: 12px 20px; margin: 24px 0; text-align: left;">
+                <p
+                    style="color: #64748b; font-size: 14px; font-style: italic; font-weight: 500; margin: 0; line-height: 1.6;">
+                    Most businesses don't fail because of product — they fail because of structure.
+                </p>
+            </div>
+
+            <div style="text-align: left; margin-top: 32px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
+                <div
+                    style="text-transform: uppercase; font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 0.1em; margin-bottom: 20px; text-align: center;">
+                    What's Next?</div>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
+                    <div
+                        style="background: #eff6ff; color: #3b82f6; width: 24px; height: 24px; min-width: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; margin-top: 2px;">
+                        1</div>
+                    <div style="color: #475569; font-size: 14px; font-weight: 500; padding-top: 3px;">We'll share
+                        platform updates as we build</div>
+                </div>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
+                    <div
+                        style="background: #eff6ff; color: #3b82f6; width: 24px; height: 24px; min-width: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; margin-top: 2px;">
+                        2</div>
+                    <div style="color: #475569; font-size: 14px; font-weight: 500; padding-top: 3px;">You'll get early
+                        access before the public launch</div>
+                </div>
+                <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
+                    <div
+                        style="background: #eff6ff; color: #3b82f6; width: 24px; height: 24px; min-width: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; margin-top: 2px;">
+                        3</div>
+                    <div style="color: #475569; font-size: 14px; font-weight: 500; padding-top: 3px;">Shape workflows
+                        with your real-world feedback</div>
+                </div>
+            </div>`,
+    },
+  });
+  console.log('✅ Email Template Seeded:', welcomeTemplate.slug);
+
+  // 2. Create Base Records (Example)
+  const records = [
+    { name: 'Financial Services', slug: 'financial-services', type: 'PRIMARY_EXPERTISE' },
+    { name: 'Legal Compliance', slug: 'legal-compliance', type: 'PRIMARY_EXPERTISE' },
+    { name: 'AI Automation', slug: 'ai-automation', type: 'SPECIALIZATION' },
+  ];
+
+  for (const record of records) {
+    await prisma.baseRecord.upsert({
+      where: { slug: record.slug },
+      update: {},
+      create: record as any,
+    });
+  }
+  console.log('✅ Base Records Seeded');
+
+  console.log('🚀 Seeding Completed Successfully');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

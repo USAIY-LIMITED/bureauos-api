@@ -1,0 +1,6 @@
+model VerificationCode {
+...boilerplate
+  code      String   @unique()
+  accountId Int
+  completed Boolean  @default(false)
+}

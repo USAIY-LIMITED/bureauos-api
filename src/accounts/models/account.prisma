@@ -1,0 +1,20 @@
+enum AccountType {
+  ADMIN
+  BUSINESS
+  PROFESSIONAL
+}
+
+model Account {
+  ...boilerplate
+  type               AccountType
+  users              User[]
+  admin              Admin?
+  business           Business?
+  professional       Professional?
+  
+  apiGateways        ApiGateway[]         @relation("AccountApiGateways")
+  
+  identityCode       String?
+
+  @@index([type])
+}

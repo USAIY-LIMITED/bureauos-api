@@ -1,0 +1,16 @@
+enum BaseRecordType {
+  JURISDICTION
+  PRIMARY_EXPERTISE
+  SPECIALIZATION
+}
+
+model BaseRecord {
+  ...boilerplate
+  name      String
+  slug      String   @unique
+  type      BaseRecordType
+  isActive  Boolean  @default(true)
+  metadata  Json?
+
+  @@index([type])
+}
