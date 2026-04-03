@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD:-bureau_pass}
       - POSTGRES_DB=${DB_NAME:-bureau_db}
     ports:
-      - '127.0.0.1:5435:5432'
+      - '127.0.0.1:5439:5432'
     volumes:
       - bureauos_data:/var/lib/postgresql/data
 
