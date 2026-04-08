@@ -3,6 +3,7 @@ import { PrismaService } from './database/prisma.service';
 import { ApiGatewayModule } from './api-gateway/api-gateway.module';
 import { BaseRecordsModule } from './base-records/base-records.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { UploadModule } from './upload/upload.module';
 
 @Global()
 @Module({
@@ -10,6 +11,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     ApiGatewayModule,
     BaseRecordsModule,
     AuditLogsModule,
+    UploadModule,
   ],
   providers: [PrismaService],
   exports: [
@@ -17,6 +19,8 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     ApiGatewayModule,
     BaseRecordsModule,
     AuditLogsModule,
+    UploadModule,
   ],
 })
 export class CoreModule {}
+

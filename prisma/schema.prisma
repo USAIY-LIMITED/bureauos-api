@@ -139,6 +139,34 @@ deletedAt DateTime?
 }
 
 
+// FROM: src/blog/models/blog-post.prisma
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  title       String
+  slug        String         @unique
+  excerpt     String?        @db.Text
+  content     String         @db.Text
+  coverImage  String?
+  status      BlogPostStatus @default(DRAFT)
+  publishedAt DateTime?
+  accountId   Int
+  account     Account        @relation(fields: [accountId], references: [id])
+  tags        String[]       @default([])
+
+  @@index([slug, status])
+  @@index([accountId])
+}
+
+
 // FROM: src/accounts/models/verificationCode.prisma
 model VerificationCode {
 id          Int      @id @default(autoincrement())
@@ -214,6 +242,7 @@ deletedAt DateTime?
   professional       Professional?
   
   apiGateways        ApiGateway[]         @relation("AccountApiGateways")
+  blogPosts          BlogPost[]
   
   identityCode       String?
 

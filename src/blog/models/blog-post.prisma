@@ -1,0 +1,22 @@
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model BlogPost {
+  ...boilerplate
+  title       String
+  slug        String         @unique
+  excerpt     String?        @db.Text
+  content     String         @db.Text
+  coverImage  String?
+  status      BlogPostStatus @default(DRAFT)
+  publishedAt DateTime?
+  accountId   Int
+  account     Account        @relation(fields: [accountId], references: [id])
+  tags        String[]       @default([])
+
+  @@index([slug, status])
+  @@index([accountId])
+}

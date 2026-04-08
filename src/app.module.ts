@@ -9,16 +9,18 @@ import { AccountsModule } from './accounts/accounts.module';
 import { UsersModule } from './users/users.module';
 import { WaitlistsModule } from './waitlists/waitlists.module';
 import { EmailManagementsModule } from './email-managements/email-managements.module';
+import { BlogModule } from './blog/blog.module';
 
 import appConfig from './core/config/app.config';
 import mailConfig from './core/config/mail.config';
 import swaggerConfig from './core/config/swagger.config';
+import uploadConfig from './core/config/upload.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, mailConfig, swaggerConfig],
+      load: [appConfig, mailConfig, swaggerConfig, uploadConfig],
     }),
     ThrottlerModule.forRoot([{
       ttl: 60000,
@@ -30,8 +32,10 @@ import swaggerConfig from './core/config/swagger.config';
     UsersModule,
     WaitlistsModule,
     EmailManagementsModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

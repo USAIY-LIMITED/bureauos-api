@@ -13,6 +13,7 @@ model Account {
   professional       Professional?
   
   apiGateways        ApiGateway[]         @relation("AccountApiGateways")
+  blogPosts          BlogPost[]
   
   identityCode       String?
 
