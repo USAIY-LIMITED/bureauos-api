@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,11 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthenticationService } from './authentication.service';
 import { CurrentUser, Public } from '../decorators';
-import {
-  ChangePasswordDto,
-  LoginDto,
-  RegisterDto,
-} from '@app/iam/authentication/dto';
+import { ChangePasswordDto, LoginDto, RegisterDto } from '@app/iam/authentication/dto';
 import type { CurrentUserData } from '@app/iam/interfaces';
 import { omit } from '@app/core/utils/functions';
 import { VerifyCodeDto } from '@app/iam/authentication/dto/verify.code.dto';
@@ -28,132 +25,111 @@ import { UpdateUserProfileDto } from '@app/users/dto/update-user-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot.password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendVerificationCodeDto } from './dto/verification-code.dto';
+import { RtGuard } from './guards/refresh-token.guard';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthenticationController {
   constructor(private readonly authService: AuthenticationService) {}
+
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Register Account',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'user created successfully',
-  })
+  @ApiOperation({ summary: 'Register Account' })
   @Post('/register')
   async register(@Body() registerDto: RegisterDto) {
     if (registerDto.dateOfBirth) {
       registerDto.dateOfBirth = new Date(registerDto.dateOfBirth).toISOString();
     }
-
-    return await this.authService.register(registerDto);
+    return this.authService.register(registerDto);
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send Verification Code' })
-  @ApiResponse({
-    status: 200,
-    description: 'Verification code sent successfully',
-  })
-  @Post('/send-verification-code')
-  async sendVerificationCode(
-    @Body() sendVerificationCodeDto: SendVerificationCodeDto,
-  ) {
-    return await this.authService.sendVerificationCode(sendVerificationCodeDto);
-  }
-
-  @Public()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Verify Token',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Verification successfully',
-  })
-  @Post('/verify')
-  async verifyToken(@Body() verifyCodeDto: VerifyCodeDto) {
-    return await this.authService.verifyToken(verifyCodeDto);
-  }
-
-  @Public()
-  /*@UseGuards(LocalAuthGuard)*/
-  @ApiOperation({
-    summary: 'Login as user of any Account',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User logged in successfully',
-  })
-  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login' })
   @Post('/login')
   async login(@Body() loginDto: LoginDto) {
-    if (loginDto.email) {
-      loginDto.email = loginDto.email.toLowerCase();
-    }
+    if (loginDto.email) loginDto.email = loginDto.email.toLowerCase();
     return this.authService.login(loginDto);
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Forgot Password' })
-  @ApiResponse({ status: 200, description: 'Password reset link sent' })
-  @Post('/forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    if (!forgotPasswordDto.email) throw new BadRequestException('Email required');
-    return await this.authService.forgotPassword(forgotPasswordDto.email);
+  @ApiOperation({ summary: 'Send OTP verification code to email' })
+  @Post('/send-verification-code')
+  async sendVerificationCode(@Body() dto: SendVerificationCodeDto) {
+    return this.authService.sendVerificationCode(dto);
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reset Password' })
-  @ApiResponse({
-    status: 200,
-    description: 'Password has been reset successfully',
-  })
+  @ApiOperation({ summary: 'Verify OTP code — activates the account' })
+  @Post('/verify')
+  async verifyToken(@Body() verifyCodeDto: VerifyCodeDto) {
+    return this.authService.verifyToken(verifyCodeDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send password reset link' })
+  @Post('/forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    if (!forgotPasswordDto.email) throw new BadRequestException('Email required');
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password using token from email' })
   @Post('/reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return await this.authService.resetPassword(
+    return this.authService.resetPassword(
       resetPasswordDto.token,
       resetPasswordDto.newPassword,
     );
   }
 
+  @Public()
+  @UseGuards(RtGuard)
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Authenticated user data',
-  })
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @Post('/refresh')
+  async refresh(@CurrentUser() user: any) {
+    return this.authService.refreshTokens(user.sub, user.refreshToken);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout — invalidates refresh token' })
+  @Post('/logout')
+  async logout(@CurrentUser() user: CurrentUserData) {
+    return this.authService.logout(user.id);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Authenticated user data' })
   @Get('/me')
   async me(@CurrentUser() user: CurrentUserData) {
     return omit(user, ['password', 'hashedRt', 'account']);
   }
 
   @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Update authenticated user data',
-  })
+  @ApiOperation({ summary: 'Update authenticated user profile' })
   @Patch('/me')
   async update(
     @CurrentUser() user: CurrentUserData,
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
-    // console.log(user)
-    // console.log(updateUserProfileDto);
-    return await this.authService.updateUser(user, updateUserProfileDto);
+    return this.authService.updateUser(user, updateUserProfileDto);
   }
 
   @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Change password',
-  })
+  @ApiOperation({ summary: 'Change password' })
   @Patch('/me/change-password')
   async changePassword(
     @CurrentUser() user: CurrentUserData,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    return await this.authService.changePassword(user, changePasswordDto);
+    return this.authService.changePassword(user, changePasswordDto);
   }
 }

@@ -98,6 +98,62 @@ async function main() {
   });
   console.log('✅ Email Template Seeded:', welcomeTemplate.slug);
 
+  const verificationTemplate = await prisma.emailTemplate.upsert({
+    where: { slug: 'email-verification' },
+    update: {},
+    create: {
+      slug: 'email-verification',
+      subject: 'Verify your BureauOS account',
+      title: 'Your verification code',
+      body: `
+        <h1 style="color: #0f172a; font-size: 26px; font-weight: 800; margin: 0 0 12px;">
+          Verify your email address
+        </h1>
+        <p style="color: #64748b; font-size: 16px; margin-bottom: 32px;">
+          Hi {{firstName}}, use the code below to verify your BureauOS account.
+          This code expires in 15 minutes.
+        </p>
+        <div style="background: #f0f7ff; border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 32px; border: 1px solid #e0f0ff;">
+          <div style="font-size: 48px; font-weight: 900; letter-spacing: 12px; color: #1d4ed8; font-family: monospace;">
+            {{code}}
+          </div>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; text-align: center;">
+          If you did not request this, you can safely ignore this email.
+        </p>`,
+    },
+  });
+  console.log('✅ Email Template Seeded:', verificationTemplate.slug);
+
+  const resetTemplate = await prisma.emailTemplate.upsert({
+    where: { slug: 'password-reset' },
+    update: {},
+    create: {
+      slug: 'password-reset',
+      subject: 'Reset your BureauOS password',
+      title: 'Password reset request',
+      body: `
+        <h1 style="color: #0f172a; font-size: 26px; font-weight: 800; margin: 0 0 12px;">
+          Reset your password
+        </h1>
+        <p style="color: #64748b; font-size: 16px; margin-bottom: 32px;">
+          Hi {{firstName}}, we received a request to reset your password.
+          Click the button below — this link expires in 1 hour.
+        </p>
+        <div style="text-align: center; margin-bottom: 32px;">
+          <a href="{{resetUrl}}"
+            style="display: inline-block; background: #1d4ed8; color: #ffffff; font-size: 16px;
+                   font-weight: 700; padding: 16px 40px; border-radius: 12px; text-decoration: none;">
+            Reset Password
+          </a>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; text-align: center;">
+          If you did not request a password reset, you can safely ignore this email.
+        </p>`,
+    },
+  });
+  console.log('✅ Email Template Seeded:', resetTemplate.slug);
+
   // 2. Create Base Records (Example)
   const records = [
     { name: 'Financial Services', slug: 'financial-services', type: 'PRIMARY_EXPERTISE' },

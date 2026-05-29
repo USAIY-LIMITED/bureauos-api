@@ -15,11 +15,16 @@ export class UserDatabaseService extends BaseDatabaseService {
     'firstName',
     'lastName',
     'password',
+    'hashedRt',
     'isFirstLogin',
     'isTermsAccepted',
     'isActivated',
     'lastLogin',
     'email',
+    'phoneNumber',
+    'bio',
+    'linkedinProfile',
+    'dateOfBirth',
   ];
   public searchable = ['firstName', 'lastName', 'email'];
   public relations = ['accounts'];
@@ -34,10 +39,12 @@ export class UserDatabaseService extends BaseDatabaseService {
   }
 
   async create(
-    { firstName, lastName, email, password, accountId }: any,
+    { firstName, lastName, email, password, accountId, isActivated }: any,
     tx: Prisma.TransactionClient | null = null,
   ) {
-    const model = tx ? (tx.user as Prisma.UserDelegate<any>) : (this.model as Prisma.UserDelegate<any>);
+    const model = tx
+      ? (tx.user as Prisma.UserDelegate<any>)
+      : (this.model as Prisma.UserDelegate<any>);
 
     const existingUser = await model.findFirst({
       where: { email },
@@ -47,7 +54,9 @@ export class UserDatabaseService extends BaseDatabaseService {
       throw new ConflictException('Email is already in use');
     }
 
-    const hashedPassword = await this.hashingService.hashPassword(password || 'password');
+    const hashedPassword = await this.hashingService.hashPassword(
+      password || 'password',
+    );
 
     const createData: any = {
       firstName,
@@ -55,6 +64,10 @@ export class UserDatabaseService extends BaseDatabaseService {
       email,
       password: hashedPassword,
     };
+
+    if (typeof isActivated === 'boolean') {
+      createData.isActivated = isActivated;
+    }
 
     if (accountId) {
       createData.accounts = {

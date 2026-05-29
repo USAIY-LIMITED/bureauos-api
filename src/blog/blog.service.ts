@@ -8,10 +8,14 @@ import { CreateBlogPostDto, BlogPostStatus } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { BlogQueryDto } from './dto/blog-query.dto';
 import { Prisma } from '@prisma/client';
+import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 
 @Injectable()
 export class BlogService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogsService: AuditLogsService,
+  ) {}
 
   /**
    * Generate a URL-friendly slug from a title.
@@ -46,7 +50,7 @@ export class BlogService {
     const publishedAt =
       dto.status === BlogPostStatus.PUBLISHED ? new Date() : null;
 
-    return this.prisma.blogPost.create({
+    const post = await this.prisma.blogPost.create({
       data: {
         title: dto.title,
         slug,
@@ -68,6 +72,15 @@ export class BlogService {
         },
       },
     });
+
+    this.auditLogsService.log({
+      action: 'CREATED',
+      entity: 'BlogPost',
+      entityId: String(post.id),
+      details: { title: post.title, status: post.status, accountId },
+    }).catch(() => {});
+
+    return post;
   }
 
   /**
@@ -273,7 +286,7 @@ export class BlogService {
       data.publishedAt = new Date();
     }
 
-    return this.prisma.blogPost.update({
+    const updated = await this.prisma.blogPost.update({
       where: { id },
       data,
       include: {
@@ -285,6 +298,15 @@ export class BlogService {
         },
       },
     });
+
+    this.auditLogsService.log({
+      action: 'UPDATED',
+      entity: 'BlogPost',
+      entityId: String(id),
+      details: { changes: Object.keys(dto) },
+    }).catch(() => {});
+
+    return updated;
   }
 
   /**
@@ -299,9 +321,17 @@ export class BlogService {
       throw new NotFoundException('Blog post not found');
     }
 
-    return this.prisma.blogPost.update({
+    const deleted = await this.prisma.blogPost.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
+
+    this.auditLogsService.log({
+      action: 'DELETED',
+      entity: 'BlogPost',
+      entityId: String(id),
+    }).catch(() => {});
+
+    return deleted;
   }
 }

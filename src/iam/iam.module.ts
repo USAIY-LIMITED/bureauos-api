@@ -4,9 +4,11 @@ import { AuthenticationController } from '@app/iam/authentication/authentication
 import { AuthenticationService } from '@app/iam/authentication/authentication.service';
 import { JwtAuthGuard } from '@app/iam/authentication/guards';
 import { JwtStrategy, LocalStrategy } from '@app/iam/authentication/strategies';
+import { RefreshTokenStrategy } from '@app/iam/authentication/strategies/refresh-token.strategy';
 import jwtConfig from '@app/iam/config/jwt.config';
 import { REQUEST_USER_KEY } from '@app/iam/iam.constants';
 import { UsersModule } from '@app/users/users.module';
+import { EmailManagementsModule } from '@app/email-managements/email-managements.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -18,6 +20,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
   imports: [
     forwardRef(() => UsersModule),
     AccountsModule,
+    EmailManagementsModule,
     ConfigModule.forFeature(jwtConfig),
     PassportModule.register({
       defaultStrategy: 'jwt',
@@ -31,6 +34,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     AuthenticationService,
     LocalStrategy,
     JwtStrategy,
+    RefreshTokenStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

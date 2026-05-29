@@ -1,6 +1,13 @@
 model VerificationCode {
 ...boilerplate
-  code      String   @unique()
+  code      String
   accountId Int
+  userId    Int?
   completed Boolean  @default(false)
+  type      String   @default("OTP")
+  expiresAt DateTime?
+
+  @@index([accountId, type, completed])
+  @@index([userId, type, completed])
+  @@index([code, type, completed])
 }

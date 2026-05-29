@@ -18,13 +18,13 @@ services:
     image: minio/minio:latest
     container_name: bureauos-minio
     restart: always
-    command: server /data --console-address ":9001"
+    command: server /data --console-address ":9004"
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-bureauos_minio}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-bureauos_minio_secret}
     ports:
-      - '127.0.0.1:9000:9000'
-      - '127.0.0.1:9001:9001'
+      - '127.0.0.1:9003:9000'
+      - '127.0.0.1:9004:9001'
     volumes:
       - bureauos_minio_data:/data
 

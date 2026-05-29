@@ -2,12 +2,14 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@app/core/database/prisma.service';
 import { CreateWaitlistDto } from './dto/waitlist.dto';
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
+import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 
 @Injectable()
 export class WaitlistsService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailManagementsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(dto: CreateWaitlistDto) {
@@ -23,15 +25,19 @@ export class WaitlistsService {
       data: dto,
     });
 
-    // Send welcome email
-    try {
-      await this.emailService.sendMail(dto.email, 'waitlist-welcome', {
+    await this.emailService
+      .sendMail(dto.email, 'waitlist-welcome', {
         firstName: dto.firstName,
         lastName: dto.lastName,
-      });
-    } catch (e) {
-      console.error('Failed to send waitlist welcome email', e);
-    }
+      })
+      .catch((e) => console.error('Failed to send waitlist welcome email', e));
+
+    this.auditLogsService.log({
+      action: 'JOINED',
+      entity: 'Waitlist',
+      entityId: String(waitlist.id),
+      details: { email: dto.email, userType: dto.userType },
+    }).catch(() => {});
 
     return waitlist;
   }

@@ -15,6 +15,7 @@ import {
 } from '@app/core/utils/functions';
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
 import { ValidationException } from '@app/core/utils/errors/http-error.filter';
+import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 
 @Injectable()
 export class AccountsService {
@@ -23,6 +24,7 @@ export class AccountsService {
     private readonly userService: UserService,
     private readonly prismaService: PrismaService,
     private readonly mailService: EmailManagementsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async findAll(filterOptions, paginationOptions) {
@@ -31,17 +33,13 @@ export class AccountsService {
       Object.keys(AccountType).includes(filterOptions.type)
     ) {
       const [data, totalCount] = await this.accountsDbService.findAll(
-        {
-          ...filterOptions,
-        },
+        { ...filterOptions },
         paginationOptions,
       );
       return { data, totalCount };
     }
 
-    throw new ValidationException({
-      type: 'Account type is required',
-    });
+    throw new ValidationException({ type: 'Account type is required' });
   }
 
   async findOne(id: number, relations: string[] = []) {
@@ -56,12 +54,10 @@ export class AccountsService {
       account.type,
     );
 
-    return {
-      [account.type.toLowerCase()]: accountTypeData,
-    };
+    return { [account.type.toLowerCase()]: accountTypeData };
   }
 
-  async create(data) {
+  async create(data: any) {
     const accountData = {
       ...data,
       email: data.email.toLowerCase(),
@@ -69,32 +65,48 @@ export class AccountsService {
       lastName: data.lastName?.toUpperCase(),
     };
 
-    const userData = { ...accountData, isActivated: true };
+    const userData = {
+      ...accountData,
+      isActivated: accountData.isActivated ?? false,
+    };
 
     try {
       const identityCode = generateUserIdentityCode();
       const accountDataWithIdentity = { ...accountData, identityCode };
-      
+
+      let createdAccount: any;
+
       await this.prismaService.$transaction(
         async (tx: Prisma.TransactionClient) => {
           const user = await this.userService.create(userData, tx);
-          const account = await this.accountsDbService.create(
+          createdAccount = await this.accountsDbService.create(
             { ...accountDataWithIdentity, userId: user.id },
             tx,
           );
 
           await this.sendWelcomeNotification(accountData.accountType, {
             to: accountData.email,
-            id: account.id,
+            id: createdAccount.id,
             firstName: accountData.firstName,
             lastName: accountData.lastName,
             email: accountData.email,
           });
-          
-          return account;
+
+          return createdAccount;
         },
         { maxWait: 10000, timeout: 50000 },
       );
+
+      this.auditLogsService
+        .log({
+          action: 'CREATED',
+          entity: 'Account',
+          entityId: String(createdAccount?.id),
+          details: { type: accountData.accountType, email: accountData.email },
+        })
+        .catch(() => {});
+
+      return createdAccount;
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -107,12 +119,7 @@ export class AccountsService {
     }
   }
 
-  private async sendWelcomeNotification(accountType: string, data: any) {
-    const content = `<h1>Welcome to BureauOS!</h1><p>Hi ${data.firstName}, your account as ${accountType} has been created.</p>`;
-    await this.mailService.sendMail(data.to, 'Welcome to BureauOS', content);
-  }
-
-  async update(id: number, data) {
+  async update(id: number, data: any, actorUserId?: number) {
     const account = await this.accountsDbService.update(id, data);
     const userData = pick(data, ['firstName', 'lastName', 'email']);
     const userId = account?.users[0]?.id;
@@ -121,11 +128,31 @@ export class AccountsService {
       await this.userService.update(userId, userData);
     }
 
+    this.auditLogsService
+      .log({
+        userId: actorUserId ?? userId,
+        action: 'UPDATED',
+        entity: 'Account',
+        entityId: String(id),
+      })
+      .catch(() => {});
+
     return account;
   }
 
-  async delete(id: number) {
-    return this.accountsDbService.delete(id);
+  async delete(id: number, actorUserId?: number) {
+    const result = await this.accountsDbService.delete(id);
+
+    this.auditLogsService
+      .log({
+        userId: actorUserId,
+        action: 'DELETED',
+        entity: 'Account',
+        entityId: String(id),
+      })
+      .catch(() => {});
+
+    return result;
   }
 
   async findByEmail(email: string) {
@@ -141,5 +168,14 @@ export class AccountsService {
         },
       },
     });
+  }
+
+  private async sendWelcomeNotification(accountType: string, data: any) {
+    await this.mailService
+      .sendMail(data.to, 'account-welcome', {
+        firstName: data.firstName,
+        accountType,
+      })
+      .catch(() => {});
   }
 }
