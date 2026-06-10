@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { WaitlistsModule } from './waitlists/waitlists.module';
 import { EmailManagementsModule } from './email-managements/email-managements.module';
 import { BlogModule } from './blog/blog.module';
+import { DocumentHubModule } from './document-hub/document-hub.module';
 
 import appConfig from './core/config/app.config';
 import mailConfig from './core/config/mail.config';
@@ -22,10 +23,12 @@ import uploadConfig from './core/config/upload.config';
       isGlobal: true,
       load: [appConfig, mailConfig, swaggerConfig, uploadConfig],
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     CoreModule,
     IamModule,
     AccountsModule,
@@ -33,9 +36,9 @@ import uploadConfig from './core/config/upload.config';
     WaitlistsModule,
     EmailManagementsModule,
     BlogModule,
+    DocumentHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-

@@ -1,0 +1,114 @@
+enum DocumentProceedingStatus {
+  OPEN
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentItemStatus {
+  REQUESTED
+  SUBMITTED
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum DocumentActivityType {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  DOCUMENT_ADDED
+  VERSION_UPLOADED
+  COMMENT_ADDED
+}
+
+model DocumentProceeding {
+  ...boilerplate
+  title                 String
+  description           String?                   @db.Text
+  status                DocumentProceedingStatus  @default(OPEN)
+  dueAt                 DateTime?
+  closedAt              DateTime?
+  createdByAccountId    Int
+  businessAccountId     Int
+  professionalAccountId Int
+  createdByAccount      Account                   @relation("DocumentProceedingCreatedBy", fields: [createdByAccountId], references: [id])
+  businessAccount       Account                   @relation("BusinessDocumentProceedings", fields: [businessAccountId], references: [id])
+  professionalAccount   Account                   @relation("ProfessionalDocumentProceedings", fields: [professionalAccountId], references: [id])
+  documents             DocumentItem[]
+  comments              DocumentComment[]
+  activities            DocumentActivity[]
+
+  @@index([businessAccountId, professionalAccountId, status])
+  @@index([createdByAccountId])
+}
+
+model DocumentItem {
+  ...boilerplate
+  proceedingId        Int
+  title               String
+  description         String?             @db.Text
+  category            String?
+  status              DocumentItemStatus  @default(REQUESTED)
+  dueAt               DateTime?
+  requestedByAccountId Int?
+  uploadedByAccountId  Int?
+  proceeding          DocumentProceeding  @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  requestedByAccount  Account?            @relation("DocumentItemRequestedBy", fields: [requestedByAccountId], references: [id])
+  uploadedByAccount   Account?            @relation("DocumentItemUploadedBy", fields: [uploadedByAccountId], references: [id])
+  versions            DocumentVersion[]
+  comments            DocumentComment[]
+
+  @@index([proceedingId, status])
+  @@index([requestedByAccountId])
+  @@index([uploadedByAccountId])
+}
+
+model DocumentVersion {
+  ...boilerplate
+  documentId          Int
+  versionNumber       Int
+  fileName            String
+  mimeType            String
+  size                Int
+  storageKey          String
+  url                 String
+  uploadedByAccountId Int
+  document            DocumentItem @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedByAccount   Account      @relation("DocumentVersionUploadedBy", fields: [uploadedByAccountId], references: [id])
+
+  @@unique([documentId, versionNumber])
+  @@index([uploadedByAccountId])
+}
+
+model DocumentComment {
+  ...boilerplate
+  proceedingId     Int
+  documentId       Int?
+  authorAccountId  Int
+  body             String              @db.Text
+  proceeding       DocumentProceeding  @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  document         DocumentItem?       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorAccount    Account             @relation("DocumentCommentAuthor", fields: [authorAccountId], references: [id])
+
+  @@index([proceedingId])
+  @@index([documentId])
+  @@index([authorAccountId])
+}
+
+model DocumentActivity {
+  ...boilerplate
+  proceedingId    Int
+  actorAccountId  Int
+  type            DocumentActivityType
+  entity          String
+  entityId        Int?
+  details         Json?
+  proceeding      DocumentProceeding @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  actorAccount    Account            @relation("DocumentActivityActor", fields: [actorAccountId], references: [id])
+
+  @@index([proceedingId, type])
+  @@index([actorAccountId])
+}

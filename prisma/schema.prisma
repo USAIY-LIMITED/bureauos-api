@@ -78,6 +78,138 @@ deletedAt DateTime?
 }
 
 
+// FROM: src/document-hub/models/document-hub.prisma
+enum DocumentProceedingStatus {
+  OPEN
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentItemStatus {
+  REQUESTED
+  SUBMITTED
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum DocumentActivityType {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  DOCUMENT_ADDED
+  VERSION_UPLOADED
+  COMMENT_ADDED
+}
+
+model DocumentProceeding {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  title                 String
+  description           String?                   @db.Text
+  status                DocumentProceedingStatus  @default(OPEN)
+  dueAt                 DateTime?
+  closedAt              DateTime?
+  createdByAccountId    Int
+  businessAccountId     Int
+  professionalAccountId Int
+  createdByAccount      Account                   @relation("DocumentProceedingCreatedBy", fields: [createdByAccountId], references: [id])
+  businessAccount       Account                   @relation("BusinessDocumentProceedings", fields: [businessAccountId], references: [id])
+  professionalAccount   Account                   @relation("ProfessionalDocumentProceedings", fields: [professionalAccountId], references: [id])
+  documents             DocumentItem[]
+  comments              DocumentComment[]
+  activities            DocumentActivity[]
+
+  @@index([businessAccountId, professionalAccountId, status])
+  @@index([createdByAccountId])
+}
+
+model DocumentItem {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  proceedingId        Int
+  title               String
+  description         String?             @db.Text
+  category            String?
+  status              DocumentItemStatus  @default(REQUESTED)
+  dueAt               DateTime?
+  requestedByAccountId Int?
+  uploadedByAccountId  Int?
+  proceeding          DocumentProceeding  @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  requestedByAccount  Account?            @relation("DocumentItemRequestedBy", fields: [requestedByAccountId], references: [id])
+  uploadedByAccount   Account?            @relation("DocumentItemUploadedBy", fields: [uploadedByAccountId], references: [id])
+  versions            DocumentVersion[]
+  comments            DocumentComment[]
+
+  @@index([proceedingId, status])
+  @@index([requestedByAccountId])
+  @@index([uploadedByAccountId])
+}
+
+model DocumentVersion {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  documentId          Int
+  versionNumber       Int
+  fileName            String
+  mimeType            String
+  size                Int
+  storageKey          String
+  url                 String
+  uploadedByAccountId Int
+  document            DocumentItem @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedByAccount   Account      @relation("DocumentVersionUploadedBy", fields: [uploadedByAccountId], references: [id])
+
+  @@unique([documentId, versionNumber])
+  @@index([uploadedByAccountId])
+}
+
+model DocumentComment {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  proceedingId     Int
+  documentId       Int?
+  authorAccountId  Int
+  body             String              @db.Text
+  proceeding       DocumentProceeding  @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  document         DocumentItem?       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorAccount    Account             @relation("DocumentCommentAuthor", fields: [authorAccountId], references: [id])
+
+  @@index([proceedingId])
+  @@index([documentId])
+  @@index([authorAccountId])
+}
+
+model DocumentActivity {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  proceedingId    Int
+  actorAccountId  Int
+  type            DocumentActivityType
+  entity          String
+  entityId        Int?
+  details         Json?
+  proceeding      DocumentProceeding @relation(fields: [proceedingId], references: [id], onDelete: Cascade)
+  actorAccount    Account            @relation("DocumentActivityActor", fields: [actorAccountId], references: [id])
+
+  @@index([proceedingId, type])
+  @@index([actorAccountId])
+}
+
+
 // FROM: src/core/base-records/models/base-records.prisma
 enum BaseRecordType {
   JURISDICTION
@@ -98,7 +230,6 @@ deletedAt DateTime?
 
   @@index([type])
 }
-
 
 // FROM: src/core/audit-logs/models/audit-logs.prisma
 model AuditLog {
@@ -250,6 +381,14 @@ deletedAt DateTime?
   
   apiGateways        ApiGateway[]         @relation("AccountApiGateways")
   blogPosts          BlogPost[]
+  createdDocumentProceedings      DocumentProceeding[] @relation("DocumentProceedingCreatedBy")
+  businessDocumentProceedings     DocumentProceeding[] @relation("BusinessDocumentProceedings")
+  professionalDocumentProceedings DocumentProceeding[] @relation("ProfessionalDocumentProceedings")
+  requestedDocumentItems          DocumentItem[]       @relation("DocumentItemRequestedBy")
+  uploadedDocumentItems           DocumentItem[]       @relation("DocumentItemUploadedBy")
+  uploadedDocumentVersions        DocumentVersion[]    @relation("DocumentVersionUploadedBy")
+  documentComments                DocumentComment[]    @relation("DocumentCommentAuthor")
+  documentActivities              DocumentActivity[]   @relation("DocumentActivityActor")
   
   identityCode       String?
 

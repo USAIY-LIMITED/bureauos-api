@@ -14,6 +14,14 @@ model Account {
   
   apiGateways        ApiGateway[]         @relation("AccountApiGateways")
   blogPosts          BlogPost[]
+  createdDocumentProceedings      DocumentProceeding[] @relation("DocumentProceedingCreatedBy")
+  businessDocumentProceedings     DocumentProceeding[] @relation("BusinessDocumentProceedings")
+  professionalDocumentProceedings DocumentProceeding[] @relation("ProfessionalDocumentProceedings")
+  requestedDocumentItems          DocumentItem[]       @relation("DocumentItemRequestedBy")
+  uploadedDocumentItems           DocumentItem[]       @relation("DocumentItemUploadedBy")
+  uploadedDocumentVersions        DocumentVersion[]    @relation("DocumentVersionUploadedBy")
+  documentComments                DocumentComment[]    @relation("DocumentCommentAuthor")
+  documentActivities              DocumentActivity[]   @relation("DocumentActivityActor")
   
   identityCode       String?
 
