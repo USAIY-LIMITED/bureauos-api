@@ -14,6 +14,9 @@ export class ApiGatewayGuard implements CanActivate {
     }
 
     const gateway = await this.gatewayService.validateKey(apiKey);
+    if (!gateway) {
+      throw new UnauthorizedException('Invalid or disabled API key');
+    }
     request.gateway = gateway; // Attach gateway info to request
     return true;
   }
