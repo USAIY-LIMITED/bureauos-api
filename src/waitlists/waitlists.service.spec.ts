@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WaitlistsService } from './waitlists.service';
-import { PrismaService } from '@app/core/database/prisma.service';
+import { WaitlistsDbService } from './waitlists.db.service';
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 import { ConflictException } from '@nestjs/common';
 import { WaitlistAccountType } from '@prisma/client';
 
-const mockPrisma = {
-  waitlist: {
-    findUnique: jest.fn(),
-    create: jest.fn(),
-  },
+const mockWaitlistsDb = {
+  findFirst: jest.fn(),
+  create: jest.fn(),
+  findAll: jest.fn(),
+  update: jest.fn(),
 };
 
 const mockEmail = {
@@ -27,11 +27,15 @@ describe('WaitlistsService', () => {
   beforeEach(async () => {
     mockEmail.sendMail.mockResolvedValue({});
     mockAuditLogs.log.mockResolvedValue({});
+    mockWaitlistsDb.findFirst.mockReset();
+    mockWaitlistsDb.create.mockReset();
+    mockWaitlistsDb.findAll.mockReset();
+    mockWaitlistsDb.update.mockReset();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WaitlistsService,
-        { provide: PrismaService, useValue: mockPrisma },
+        { provide: WaitlistsDbService, useValue: mockWaitlistsDb },
         { provide: EmailManagementsService, useValue: mockEmail },
         { provide: AuditLogsService, useValue: mockAuditLogs },
       ],
@@ -60,18 +64,18 @@ describe('WaitlistsService', () => {
     };
 
     it('should throw ConflictException if duplicate email', async () => {
-      mockPrisma.waitlist.findUnique.mockResolvedValue({ id: 1 });
+      mockWaitlistsDb.findFirst.mockResolvedValue({ id: 1 });
 
       await expect(service.create(dto as any)).rejects.toThrow(ConflictException);
     });
 
     it('should create subscription and trigger welcome email', async () => {
-      mockPrisma.waitlist.findUnique.mockResolvedValue(null);
-      mockPrisma.waitlist.create.mockResolvedValue({ id: 1, ...dto });
+      mockWaitlistsDb.findFirst.mockResolvedValue(null);
+      mockWaitlistsDb.create.mockResolvedValue({ id: 1, ...dto });
 
       const result = await service.create(dto as any);
 
-      expect(mockPrisma.waitlist.create).toHaveBeenCalled();
+      expect(mockWaitlistsDb.create).toHaveBeenCalled();
       expect(mockEmail.sendMail).toHaveBeenCalledWith(
         'test@bureauos.space',
         'waitlist-welcome',

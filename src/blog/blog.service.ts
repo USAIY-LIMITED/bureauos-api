@@ -3,7 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '@app/core/database/prisma.service';
+import { BlogDbService } from './blog.db.service';
 import { CreateBlogPostDto, BlogPostStatus } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { BlogQueryDto } from './dto/blog-query.dto';
@@ -13,7 +13,7 @@ import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 @Injectable()
 export class BlogService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly blogDbService: BlogDbService,
     private readonly auditLogsService: AuditLogsService,
   ) {}
 
@@ -40,9 +40,7 @@ export class BlogService {
     const slug = this.generateSlug(dto.title);
 
     // Ensure unique slug (edge case: collision)
-    const existing = await this.prisma.blogPost.findUnique({
-      where: { slug },
-    });
+    const existing = await this.blogDbService.findFirst({ slug });
     if (existing) {
       throw new ConflictException('Generated slug already exists. Please try again.');
     }
@@ -50,7 +48,7 @@ export class BlogService {
     const publishedAt =
       dto.status === BlogPostStatus.PUBLISHED ? new Date() : null;
 
-    const post = await this.prisma.blogPost.create({
+    const post = await this.blogDbService.blogPost.create({
       data: {
         title: dto.title,
         slug,
@@ -107,8 +105,8 @@ export class BlogService {
       ];
     }
 
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.blogPost.findMany({
+    const [data, total] = await this.blogDbService.prismaClient.$transaction([
+      this.blogDbService.blogPost.findMany({
         where,
         skip,
         take: limit,
@@ -130,7 +128,7 @@ export class BlogService {
           },
         },
       }),
-      this.prisma.blogPost.count({ where }),
+      this.blogDbService.blogPost.count({ where }),
     ]);
 
     return {
@@ -148,7 +146,7 @@ export class BlogService {
    * Get a single published post by slug (public).
    */
   async findBySlug(slug: string) {
-    const post = await this.prisma.blogPost.findFirst({
+    const post = await this.blogDbService.blogPost.findFirst({
       where: { slug, status: 'PUBLISHED', deletedAt: null },
       include: {
         account: {
@@ -194,8 +192,8 @@ export class BlogService {
       ];
     }
 
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.blogPost.findMany({
+    const [data, total] = await this.blogDbService.prismaClient.$transaction([
+      this.blogDbService.blogPost.findMany({
         where,
         skip,
         take: limit,
@@ -209,7 +207,7 @@ export class BlogService {
           },
         },
       }),
-      this.prisma.blogPost.count({ where }),
+      this.blogDbService.blogPost.count({ where }),
     ]);
 
     return {
@@ -227,7 +225,7 @@ export class BlogService {
    * Get a single post by ID (admin — any status).
    */
   async findOneAdmin(id: number) {
-    const post = await this.prisma.blogPost.findFirst({
+    const post = await this.blogDbService.blogPost.findFirst({
       where: { id, deletedAt: null },
       include: {
         account: {
@@ -250,7 +248,7 @@ export class BlogService {
    * Get all unique tags from published posts (public).
    */
   async findAllTags(): Promise<string[]> {
-    const posts = await this.prisma.blogPost.findMany({
+    const posts = await this.blogDbService.blogPost.findMany({
       where: { status: 'PUBLISHED', deletedAt: null },
       select: { tags: true },
     });
@@ -269,9 +267,7 @@ export class BlogService {
    * Update a blog post (admin only).
    */
   async update(id: number, dto: UpdateBlogPostDto) {
-    const post = await this.prisma.blogPost.findFirst({
-      where: { id, deletedAt: null },
-    });
+    const post = await this.blogDbService.findFirst({ id });
 
     if (!post) {
       throw new NotFoundException('Blog post not found');
@@ -286,7 +282,7 @@ export class BlogService {
       data.publishedAt = new Date();
     }
 
-    const updated = await this.prisma.blogPost.update({
+    const updated = await this.blogDbService.blogPost.update({
       where: { id },
       data,
       include: {
@@ -313,18 +309,13 @@ export class BlogService {
    * Soft-delete a blog post (admin only).
    */
   async remove(id: number) {
-    const post = await this.prisma.blogPost.findFirst({
-      where: { id, deletedAt: null },
-    });
+    const post = await this.blogDbService.findFirst({ id });
 
     if (!post) {
       throw new NotFoundException('Blog post not found');
     }
 
-    const deleted = await this.prisma.blogPost.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    const deleted = await this.blogDbService.delete(id);
 
     this.auditLogsService.log({
       action: 'DELETED',

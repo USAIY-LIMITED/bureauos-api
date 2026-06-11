@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@app/core/database/prisma.service';
+import { EmailManagementDbService } from './email-management.db.service';
 import * as nodemailer from 'nodemailer';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
@@ -13,7 +13,7 @@ export class EmailManagementsService {
   private templateLoader;
 
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly emailManagementDbService: EmailManagementDbService,
     private readonly configService: ConfigService,
   ) {
     const mailConfigValues = this.configService.get('mail');
@@ -36,9 +36,7 @@ export class EmailManagementsService {
   }
 
   async sendMail(to: string, slug: string, data: any) {
-    const template = await this.prisma.emailTemplate.findUnique({
-      where: { slug },
-    });
+    const template = await this.emailManagementDbService.findBySlug(slug);
 
     if (!template) {
       throw new NotFoundException(`Email template with slug "${slug}" not found`);
@@ -73,32 +71,23 @@ export class EmailManagementsService {
 
   // CRUD for Email Templates (used by controller)
   async createTemplate(data: any) {
-    return this.prisma.emailTemplate.create({ data });
+    return this.emailManagementDbService.create(data);
   }
 
   async findAllTemplates() {
-    return this.prisma.emailTemplate.findMany({
-      where: { deletedAt: null },
-    });
+    const [data] = await this.emailManagementDbService.findAll();
+    return data;
   }
 
   async findOneTemplate(id: number) {
-    return this.prisma.emailTemplate.findUnique({
-      where: { id },
-    });
+    return this.emailManagementDbService.findById(id);
   }
 
   async updateTemplate(id: number, data: any) {
-    return this.prisma.emailTemplate.update({
-      where: { id },
-      data,
-    });
+    return this.emailManagementDbService.update(id, data);
   }
 
   async removeTemplate(id: number) {
-    return this.prisma.emailTemplate.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    return this.emailManagementDbService.delete(id);
   }
 }

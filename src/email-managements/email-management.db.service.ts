@@ -10,4 +10,8 @@ export class EmailManagementDbService extends BaseDatabaseService {
   constructor(prisma: PrismaService) {
     super(prisma.emailTemplate);
   }
+
+  get emailTemplate() {
+    return this.model;
+  }
 }

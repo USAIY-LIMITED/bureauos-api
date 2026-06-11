@@ -11,7 +11,7 @@ import {
   DocumentProceedingStatus,
   Prisma,
 } from '@prisma/client';
-import { PrismaService } from '@app/core/database/prisma.service';
+import { DocumentHubDbService } from './document-hub.db.service';
 import { UploadService } from '@app/core/upload/upload.service';
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 import type { CurrentUserData } from '@app/iam/interfaces';
@@ -27,7 +27,7 @@ import {
 @Injectable()
 export class DocumentHubService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly documentHubDbService: DocumentHubDbService,
     private readonly uploadService: UploadService,
     private readonly auditLogsService: AuditLogsService,
   ) {}
@@ -36,7 +36,7 @@ export class DocumentHubService {
     dto: CreateDocumentProceedingDto,
     user: CurrentUserData,
   ) {
-    const professional = await this.prisma.account.findFirst({
+    const professional = await this.documentHubDbService.account.findFirst({
       where: {
         id: dto.professionalAccountId,
         type: AccountType.PROFESSIONAL,
@@ -48,7 +48,7 @@ export class DocumentHubService {
       throw new NotFoundException('Professional account not found');
     }
 
-    const proceeding = await this.prisma.documentProceeding.create({
+    const proceeding = await this.documentHubDbService.documentProceeding.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -115,15 +115,15 @@ export class DocumentHubService {
       ];
     }
 
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.documentProceeding.findMany({
+    const [data, total] = await this.documentHubDbService.prismaClient.$transaction([
+      this.documentHubDbService.documentProceeding.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: this.proceedingInclude(false),
       }),
-      this.prisma.documentProceeding.count({ where }),
+      this.documentHubDbService.documentProceeding.count({ where }),
     ]);
 
     return {
@@ -140,7 +140,7 @@ export class DocumentHubService {
   async findOne(id: number, user: CurrentUserData) {
     await this.ensureProceedingAccess(id, user);
 
-    return this.prisma.documentProceeding.findFirst({
+    return this.documentHubDbService.documentProceeding.findFirst({
       where: { id, deletedAt: null },
       include: this.proceedingInclude(true),
     });
@@ -165,7 +165,7 @@ export class DocumentHubService {
           : undefined,
     };
 
-    const proceeding = await this.prisma.documentProceeding.update({
+    const proceeding = await this.documentHubDbService.documentProceeding.update({
       where: { id },
       data,
       include: this.proceedingInclude(),
@@ -193,7 +193,7 @@ export class DocumentHubService {
   ) {
     await this.ensureProceedingAccess(proceedingId, user);
 
-    const document = await this.prisma.documentItem.create({
+    const document = await this.documentHubDbService.documentItem.create({
       data: {
         proceedingId,
         title: dto.title,
@@ -233,7 +233,7 @@ export class DocumentHubService {
     }
 
     const document = await this.ensureDocumentAccess(documentId, user);
-    const latest = await this.prisma.documentVersion.aggregate({
+    const latest = await this.documentHubDbService.documentVersion.aggregate({
       where: { documentId },
       _max: { versionNumber: true },
     });
@@ -243,8 +243,8 @@ export class DocumentHubService {
       `document-hub/proceedings/${document.proceedingId}/documents/${documentId}`,
     );
 
-    await this.prisma.$transaction([
-      this.prisma.documentVersion.create({
+    await this.documentHubDbService.prismaClient.$transaction([
+      this.documentHubDbService.documentVersion.create({
         data: {
           documentId,
           versionNumber,
@@ -256,7 +256,7 @@ export class DocumentHubService {
           uploadedByAccountId: user.account.id,
         },
       }),
-      this.prisma.documentItem.update({
+      this.documentHubDbService.documentItem.update({
         where: { id: documentId },
         data: {
           status: DocumentItemStatus.SUBMITTED,
@@ -274,7 +274,7 @@ export class DocumentHubService {
       { documentId, versionNumber, fileName: file.originalname },
     );
 
-    return this.prisma.documentItem.findFirst({
+    return this.documentHubDbService.documentItem.findFirst({
       where: { id: documentId, deletedAt: null },
       include: this.documentInclude(),
     });
@@ -287,7 +287,7 @@ export class DocumentHubService {
   ) {
     const document = await this.ensureDocumentAccess(documentId, user);
 
-    const updated = await this.prisma.documentItem.update({
+    const updated = await this.documentHubDbService.documentItem.update({
       where: { id: documentId },
       data: { status: dto.status },
       include: this.documentInclude(),
@@ -312,7 +312,7 @@ export class DocumentHubService {
   ) {
     await this.ensureProceedingAccess(proceedingId, user);
 
-    const comment = await this.prisma.documentComment.create({
+    const comment = await this.documentHubDbService.documentComment.create({
       data: {
         proceedingId,
         authorAccountId: user.account.id,
@@ -339,7 +339,7 @@ export class DocumentHubService {
   ) {
     const document = await this.ensureDocumentAccess(documentId, user);
 
-    const comment = await this.prisma.documentComment.create({
+    const comment = await this.documentHubDbService.documentComment.create({
       data: {
         proceedingId: document.proceedingId,
         documentId,
@@ -362,7 +362,7 @@ export class DocumentHubService {
   }
 
   private async ensureProceedingAccess(id: number, user: CurrentUserData) {
-    const proceeding = await this.prisma.documentProceeding.findFirst({
+    const proceeding = await this.documentHubDbService.documentProceeding.findFirst({
       where: { id, deletedAt: null },
     });
 
@@ -385,7 +385,7 @@ export class DocumentHubService {
     documentId: number,
     user: CurrentUserData,
   ) {
-    const document = await this.prisma.documentItem.findFirst({
+    const document = await this.documentHubDbService.documentItem.findFirst({
       where: { id: documentId, deletedAt: null },
       include: { proceeding: true },
     });
@@ -413,7 +413,7 @@ export class DocumentHubService {
     entityId?: number,
     details?: Prisma.InputJsonValue,
   ) {
-    return this.prisma.documentActivity.create({
+    return this.documentHubDbService.documentActivity.create({
       data: {
         proceedingId,
         actorAccountId,
