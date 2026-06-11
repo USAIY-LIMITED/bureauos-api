@@ -30,13 +30,10 @@ export class AccountsGuard implements CanActivate {
 
     // Append Current User AccountID for non-admin users
     if (accountType !== AccountType.ADMIN) {
+      request.body = request.body ?? {};
+      request.query = request.query ?? {};
       request.body['accountId'] = accountId;
       request.query['accountId'] = accountId;
-
-      // Ensure users can only update their own profile if not admin
-      if (request.method === 'PATCH' && request.url.includes('/accounts')) {
-        request.params['id'] = String(accountId);
-      }
     }
 
     return contextAccounts.some((account) => accountType === account);

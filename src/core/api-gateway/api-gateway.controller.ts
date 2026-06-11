@@ -13,6 +13,8 @@ import { ApiGatewayService } from './api-gateway.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AccountType } from '@prisma/client';
 import { Accounts } from '@app/accounts/decorators/accounts.decorator';
+import { ApiGatewayDto } from '@app/core/dto/api-gateway.dto';
+import { UpdateApiGatewayDto } from '@app/core/dto/update-api-gateway.dto';
 
 @ApiTags('BureauOS - Api Gateway')
 @ApiBearerAuth()
@@ -23,7 +25,7 @@ export class ApiGatewayController {
 
   @Post()
   @ApiOperation({ summary: 'Create API Gateway Key' })
-  async create(@Body() apiGatewayDto: any) {
+  async create(@Body() apiGatewayDto: ApiGatewayDto) {
     return await this.apiGatewayService.create(apiGatewayDto);
   }
 
@@ -41,7 +43,10 @@ export class ApiGatewayController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update API Gateway Key' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateApiGatewayDto,
+  ) {
     return await this.apiGatewayService.update(id, data);
   }
 

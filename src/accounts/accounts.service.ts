@@ -2,6 +2,7 @@ import { AccountDatabaseService } from '@app/accounts/accounts.db.service';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import {
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
 import { ValidationException } from '@app/core/utils/errors/http-error.filter';
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
+import type { CurrentUserData } from '@app/iam/interfaces';
 
 @Injectable()
 export class AccountsService {
@@ -42,7 +44,13 @@ export class AccountsService {
     throw new ValidationException({ type: 'Account type is required' });
   }
 
-  async findOne(id: number, relations: string[] = []) {
+  async findOne(
+    id: number,
+    relations: string[] = [],
+    actor?: CurrentUserData,
+  ) {
+    this.ensureAdminOrOwner(id, actor);
+
     const account = await this.accountsDbService.findById(id, relations);
 
     if (!account || account.deletedAt) {
@@ -119,7 +127,9 @@ export class AccountsService {
     }
   }
 
-  async update(id: number, data: any, actorUserId?: number) {
+  async update(id: number, data: any, actor?: CurrentUserData) {
+    this.ensureAdminOrOwner(id, actor);
+
     const account = await this.accountsDbService.update(id, data);
     const userData = pick(data, ['firstName', 'lastName', 'email']);
     const userId = account?.users[0]?.id;
@@ -130,7 +140,7 @@ export class AccountsService {
 
     this.auditLogsService
       .log({
-        userId: actorUserId ?? userId,
+        userId: actor?.id ?? userId,
         action: 'UPDATED',
         entity: 'Account',
         entityId: String(id),
@@ -177,5 +187,16 @@ export class AccountsService {
         accountType,
       })
       .catch(() => {});
+  }
+
+  private ensureAdminOrOwner(id: number, actor?: CurrentUserData) {
+    if (!actor) return;
+
+    if (
+      actor.account.type !== AccountType.ADMIN &&
+      actor.account.id !== id
+    ) {
+      throw new ForbiddenException('You do not have access to this account');
+    }
   }
 }

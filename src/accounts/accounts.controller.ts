@@ -21,6 +21,8 @@ import { ApiFilterPagination } from '@app/core/decorators/api-filter-pagination.
 import { PaginationInterceptor } from '@app/core/pagination/pagination.interceptor';
 import { FiltersQuery, PaginationQuery } from '@app/core/decorators';
 import { Accounts } from '@app/accounts/decorators/accounts.decorator';
+import { CurrentUser } from '@app/iam/decorators';
+import type { CurrentUserData } from '@app/iam/interfaces';
 
 @Controller('accounts')
 @ApiTags('Accounts')
@@ -52,19 +54,33 @@ export class AccountsController {
     return await this.accountsService.create(createAccountDto);
   }
 
+  @Accounts(
+    AccountType.ADMIN,
+    AccountType.BUSINESS,
+    AccountType.PROFESSIONAL,
+  )
   @Get(':id')
   @ApiOperation({ summary: 'Get account details by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.accountsService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: CurrentUserData,
+  ) {
+    return await this.accountsService.findOne(id, [], user);
   }
 
+  @Accounts(
+    AccountType.ADMIN,
+    AccountType.BUSINESS,
+    AccountType.PROFESSIONAL,
+  )
   @Patch(':id')
   @ApiOperation({ summary: 'Update account details' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAccountDto: any,
+    @CurrentUser() user: CurrentUserData,
   ) {
-    return await this.accountsService.update(id, updateAccountDto);
+    return await this.accountsService.update(id, updateAccountDto, user);
   }
 
   @Accounts(AccountType.ADMIN)

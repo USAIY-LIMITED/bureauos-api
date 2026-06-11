@@ -23,6 +23,7 @@ import { AccountsService } from '@app/accounts/accounts.service';
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 import { VerifyCodeDto } from './dto/verify.code.dto';
+import { AccountType } from '@prisma/client';
 
 @Injectable()
 export class AuthenticationService {
@@ -39,6 +40,15 @@ export class AuthenticationService {
   ) {}
 
   async register(data: RegisterDto) {
+    const publicAccountTypes: AccountType[] = [
+      AccountType.BUSINESS,
+      AccountType.PROFESSIONAL,
+    ];
+
+    if (!publicAccountTypes.includes(data.accountType)) {
+      throw new BadRequestException('Invalid account type for registration');
+    }
+
     const { password, ...accountData } = data;
 
     const result = await this.accountService.create({

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -28,7 +29,7 @@ export class RegisterDto {
   email: string;
 
   @ApiProperty({ enum: [AccountType.BUSINESS, AccountType.PROFESSIONAL] })
-  @IsEnum(AccountType)
+  @IsIn([AccountType.BUSINESS, AccountType.PROFESSIONAL])
   accountType: AccountType;
 
   @ApiProperty({
