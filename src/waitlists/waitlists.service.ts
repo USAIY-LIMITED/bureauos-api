@@ -25,10 +25,13 @@ export class WaitlistsService {
       data: dto,
     });
 
+    const [firstName = '', ...lastNameParts] = dto.fullName.trim().split(/\s+/);
+    const lastName = lastNameParts.join(' ') || '';
+
     await this.emailService
       .sendMail(dto.email, 'waitlist-welcome', {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
+        firstName,
+        lastName,
       })
       .catch((e) => console.error('Failed to send waitlist welcome email', e));
 
@@ -36,7 +39,7 @@ export class WaitlistsService {
       action: 'JOINED',
       entity: 'Waitlist',
       entityId: String(waitlist.id),
-      details: { email: dto.email, userType: dto.userType },
+      details: { email: dto.email, accountType: dto.accountType, fullName: dto.fullName },
     }).catch(() => {});
 
     return waitlist;

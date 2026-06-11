@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsNotEmpty, IsEmail, IsOptional, IsBoolean, IsArray } from 'class-validator';
-import { AccountType } from '@prisma/client';
+import { IsEnum, IsString, IsNotEmpty, IsEmail, IsOptional, IsBoolean } from 'class-validator';
+import { WaitlistAccountType } from '@prisma/client';
 
 export class CreateWaitlistDto {
   @ApiProperty()
@@ -11,21 +11,31 @@ export class CreateWaitlistDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  firstName: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @ApiProperty({ enum: AccountType })
-  @IsEnum(AccountType)
-  userType: AccountType;
+  fullName: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   linkedinProfile?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  country: string;
+
+  @ApiProperty({ enum: WaitlistAccountType })
+  @IsEnum(WaitlistAccountType)
+  accountType: WaitlistAccountType;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  founderStage?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  professionalCategory?: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -35,23 +45,26 @@ export class CreateWaitlistDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  jurisdiction?: string;
+  rolePosition?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  biggestChallenge: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  challengeArea: string;
 
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  primaryExpertise?: string;
+  bosHelp?: string;
 
-  @ApiProperty({ required: false, isArray: true, type: String })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  specializations?: string[];
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  yearsExperience?: string;
+  @ApiProperty()
+  @IsBoolean()
+  wantsNewsletter: boolean;
 
   @ApiProperty({ required: false, default: true })
   @IsBoolean()

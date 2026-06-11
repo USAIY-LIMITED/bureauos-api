@@ -1,16 +1,24 @@
+enum WaitlistAccountType {
+  Founder
+  Professional
+}
+
 model Waitlist {
   ...boilerplate
   email           String   @unique
-  firstName       String
-  lastName        String
-  userType        AccountType
+  fullName        String
   linkedinProfile String?
+  country         String
+  accountType     WaitlistAccountType
+  founderStage    String?
+  professionalCategory String?
   companyName     String?
-  jurisdiction    String?
-  primaryExpertise String?
-  specializations String[] @default([])
-  yearsExperience String?
+  rolePosition    String?
+  biggestChallenge String
+  challengeArea   String
+  bosHelp         String?
+  wantsNewsletter Boolean
   subscribed_for_waitlist Boolean @default(true)
 
-  @@index([email, userType])
+  @@index([email, accountType])
 }

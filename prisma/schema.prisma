@@ -18,24 +18,32 @@ datasource db {
 
 
 // FROM: src/waitlists/models/waitlists.prisma
+enum WaitlistAccountType {
+  Founder
+  Professional
+}
+
 model Waitlist {
   id          Int      @id @default(autoincrement())
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 deletedAt DateTime?
   email           String   @unique
-  firstName       String
-  lastName        String
-  userType        AccountType
+  fullName        String
   linkedinProfile String?
+  country         String
+  accountType     WaitlistAccountType
+  founderStage    String?
+  professionalCategory String?
   companyName     String?
-  jurisdiction    String?
-  primaryExpertise String?
-  specializations String[] @default([])
-  yearsExperience String?
+  rolePosition    String?
+  biggestChallenge String
+  challengeArea   String
+  bosHelp         String?
+  wantsNewsletter Boolean
   subscribed_for_waitlist Boolean @default(true)
 
-  @@index([email, userType])
+  @@index([email, accountType])
 }
 
 
@@ -231,6 +239,7 @@ deletedAt DateTime?
   @@index([type])
 }
 
+
 // FROM: src/core/audit-logs/models/audit-logs.prisma
 model AuditLog {
   id          Int      @id @default(autoincrement())
@@ -394,3 +403,4 @@ deletedAt DateTime?
 
   @@index([type])
 }
+
