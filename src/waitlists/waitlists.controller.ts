@@ -1,11 +1,28 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { WaitlistsService } from './waitlists.service';
 import { CreateWaitlistDto } from './dto/waitlist.dto';
-import { ApiGatewayGuard } from '@app/core/api-gateway/guards/api-gateway.guard';
 import { Public } from '@app/iam/decorators/public.decorator';
+import { Accounts } from '@app/accounts/decorators/accounts.decorator';
+import { AccountType } from '@prisma/client';
+import { ApiGatewayGuard } from '@app/core/api-gateway/guards/api-gateway.guard';
 
 @ApiTags('Waitlists')
+@ApiSecurity('X-API-KEY')
+@UseGuards(ApiGatewayGuard)
 @Controller('waitlists')
 export class WaitlistsController {
   constructor(private readonly waitlistsService: WaitlistsService) {}
@@ -18,20 +35,24 @@ export class WaitlistsController {
   }
 
   @Get()
-  @UseGuards(ApiGatewayGuard)
+  @Accounts(AccountType.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all waitlist subscribers' })
   findAll() {
     return this.waitlistsService.findAll();
   }
 
   @Get(':email')
-  @UseGuards(ApiGatewayGuard)
+  @Accounts(AccountType.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Find a subscriber by email' })
   findOne(@Param('email') email: string) {
     return this.waitlistsService.findByEmail(email);
   }
 
   @Delete(':email')
+  @Accounts(AccountType.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Unsubscribe from waitlist' })
   remove(@Param('email') email: string) {
     return this.waitlistsService.unsubscribe(email);

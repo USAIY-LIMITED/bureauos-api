@@ -4,14 +4,19 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { ApiGatewayService } from './api-gateway.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AccountType } from '@prisma/client';
+import { Accounts } from '@app/accounts/decorators/accounts.decorator';
 
 @ApiTags('BureauOS - Api Gateway')
+@ApiBearerAuth()
+@Accounts(AccountType.ADMIN)
 @Controller('api-gateway')
 export class ApiGatewayController {
   constructor(private readonly apiGatewayService: ApiGatewayService) {}
@@ -30,19 +35,19 @@ export class ApiGatewayController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Find one API Gateway Key' })
-  async findOne(@Param('id') id: string) {
-    return await this.apiGatewayService.findOne(+id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.apiGatewayService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update API Gateway Key' })
-  async update(@Param('id') id: string, @Body() data: any) {
-    return await this.apiGatewayService.update(+id, data);
+  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return await this.apiGatewayService.update(id, data);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete API Gateway Key' })
-  async remove(@Param('id') id: string) {
-    return await this.apiGatewayService.delete(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.apiGatewayService.delete(id);
   }
 }
