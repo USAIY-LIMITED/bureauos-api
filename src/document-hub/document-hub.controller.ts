@@ -34,7 +34,7 @@ import {
 
 @ApiTags('Document Hub')
 @ApiBearerAuth()
-@Controller('document-hub')
+@Controller({ path: 'document-hub', version: '1' })
 export class DocumentHubController {
   constructor(private readonly documentHubService: DocumentHubService) {}
 

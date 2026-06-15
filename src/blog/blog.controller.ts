@@ -24,7 +24,7 @@ import type { CurrentUserData } from '@app/iam/interfaces';
 import { UploadService } from '@app/core/upload/upload.service';
 
 @ApiTags('Blog')
-@Controller('blog')
+@Controller({ path: 'blog', version: '1' })
 export class BlogController {
   constructor(
     private readonly blogService: BlogService,

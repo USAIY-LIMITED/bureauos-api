@@ -23,7 +23,7 @@ import { ApiGatewayGuard } from '@app/core/api-gateway/guards/api-gateway.guard'
 @ApiTags('Waitlists')
 @ApiSecurity('X-API-KEY')
 @UseGuards(ApiGatewayGuard)
-@Controller('waitlists')
+@Controller({ path: 'waitlists', version: '1' })
 export class WaitlistsController {
   constructor(private readonly waitlistsService: WaitlistsService) {}
 

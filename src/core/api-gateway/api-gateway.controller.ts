@@ -19,7 +19,7 @@ import { UpdateApiGatewayDto } from '@app/core/dto/update-api-gateway.dto';
 @ApiTags('BureauOS - Api Gateway')
 @ApiBearerAuth()
 @Accounts(AccountType.ADMIN)
-@Controller('api-gateway')
+@Controller({ path: 'api-gateway', version: '1' })
 export class ApiGatewayController {
   constructor(private readonly apiGatewayService: ApiGatewayService) {}
 

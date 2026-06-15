@@ -24,7 +24,7 @@ import { Accounts } from '@app/accounts/decorators/accounts.decorator';
 import { CurrentUser } from '@app/iam/decorators';
 import type { CurrentUserData } from '@app/iam/interfaces';
 
-@Controller('accounts')
+@Controller({ path: 'accounts', version: '1' })
 @ApiTags('Accounts')
 @ApiBearerAuth()
 export class AccountsController {

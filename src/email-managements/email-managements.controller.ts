@@ -13,7 +13,7 @@ import { EmailManagementsService } from './email-managements.service';
 import { AccountType } from '@prisma/client';
 import { Accounts } from '@app/accounts/decorators/accounts.decorator';
 
-@Controller('email-managements')
+@Controller({ path: 'email-managements', version: '1' })
 @ApiTags('Email Templates')
 @ApiBearerAuth()
 export class EmailManagementsController {

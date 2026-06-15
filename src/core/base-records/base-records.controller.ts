@@ -5,7 +5,7 @@ import { CreateBaseRecordDto, UpdateBaseRecordDto } from './dto/base-record.dto'
 import { BaseRecordType } from '@prisma/client';
 
 @ApiTags('Base Records')
-@Controller('base-records')
+@Controller({ path: 'base-records', version: '1' })
 export class BaseRecordsController {
   constructor(private readonly baseRecordsService: BaseRecordsService) {}
 

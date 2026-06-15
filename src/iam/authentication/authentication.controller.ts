@@ -27,7 +27,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SendVerificationCodeDto } from './dto/verification-code.dto';
 import { RtGuard } from './guards/refresh-token.guard';
 
-@Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 @ApiTags('auth')
 export class AuthenticationController {
   constructor(private readonly authService: AuthenticationService) {}

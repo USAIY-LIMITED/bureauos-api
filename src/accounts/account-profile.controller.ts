@@ -10,7 +10,7 @@ import {
   HandlerAction,
 } from './pipes/account-validation.pipe';
 
-@Controller('account-profile')
+@Controller({ path: 'account-profile', version: '1' })
 @Accounts(
   AccountType.ADMIN,
   AccountType.BUSINESS,
