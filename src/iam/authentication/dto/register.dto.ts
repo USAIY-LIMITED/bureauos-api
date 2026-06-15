@@ -54,18 +54,4 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   companyName?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  dateOfBirth?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  identityCode?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  jurisdiction?: string;
 }

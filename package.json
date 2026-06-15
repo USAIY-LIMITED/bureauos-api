@@ -22,7 +22,8 @@
     "prisma:generate": "npm run prisma:merge && npx prisma generate",
     "prisma:migrate": "npm run prisma:merge && npx prisma migrate dev",
     "prisma:studio": "npx prisma studio",
-    "deploy": "npm run prisma:generate && npm run prisma:migrate && npx prisma db seed"
+    "deploy": "npm run prisma:generate && npm run prisma:migrate && npx prisma db seed",
+    "bootstrap": "ts-node -r tsconfig-paths/register scripts/bootstrap.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1026.0",

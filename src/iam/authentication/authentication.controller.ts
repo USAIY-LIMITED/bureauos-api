@@ -30,16 +30,13 @@ import { RtGuard } from './guards/refresh-token.guard';
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('auth')
 export class AuthenticationController {
-  constructor(private readonly authService: AuthenticationService) {}
+  constructor(private readonly authService: AuthenticationService) { }
 
   @Public()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register Account' })
   @Post('/register')
   async register(@Body() registerDto: RegisterDto) {
-    if (registerDto.dateOfBirth) {
-      registerDto.dateOfBirth = new Date(registerDto.dateOfBirth).toISOString();
-    }
     return this.authService.register(registerDto);
   }
 
