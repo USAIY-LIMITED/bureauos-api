@@ -61,6 +61,7 @@ describe('WaitlistsService', () => {
       biggestChallenge: 'Finding early customers',
       challengeArea: 'Business Development',
       wantsNewsletter: true,
+      expansionTarget: ['United Kingdom', 'Saudi Arabia'],
     };
 
     it('should throw ConflictException if duplicate email', async () => {

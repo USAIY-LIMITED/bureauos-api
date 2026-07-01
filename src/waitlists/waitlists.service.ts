@@ -35,7 +35,12 @@ export class WaitlistsService {
       action: 'JOINED',
       entity: 'Waitlist',
       entityId: String(waitlist.id),
-      details: { email: dto.email, accountType: dto.accountType, fullName: dto.fullName },
+      details: {
+        email: dto.email,
+        accountType: dto.accountType,
+        fullName: dto.fullName,
+        expansionTarget: dto.expansionTarget,
+      },
     }).catch(() => { });
 
     return waitlist;

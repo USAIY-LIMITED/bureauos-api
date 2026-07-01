@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsNotEmpty, IsEmail, IsOptional, IsBoolean } from 'class-validator';
+import { IsEnum, IsString, IsNotEmpty, IsEmail, IsOptional, IsBoolean, IsArray } from 'class-validator';
 import { WaitlistAccountType } from '@prisma/client';
 
 export class CreateWaitlistDto {
@@ -46,6 +46,12 @@ export class CreateWaitlistDto {
   @IsString()
   @IsOptional()
   rolePosition?: string;
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  expansionTarget?: string[];
 
   @ApiProperty()
   @IsString()

@@ -37,6 +37,7 @@ deletedAt DateTime?
   professionalCategory String?
   companyName     String?
   rolePosition    String?
+  expansionTarget String[] @default([])
   biggestChallenge String
   challengeArea   String
   bosHelp         String?
