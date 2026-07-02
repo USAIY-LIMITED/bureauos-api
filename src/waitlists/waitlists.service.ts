@@ -3,6 +3,7 @@ import { CreateWaitlistDto } from './dto/waitlist.dto';
 import { EmailManagementsService } from '@app/email-managements/email-managements.service';
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 import { WaitlistsDbService } from './waitlists.db.service';
+import { WaitlistsSegmentationService } from './waitlists.segmentation.service';
 
 @Injectable()
 export class WaitlistsService {
@@ -10,6 +11,7 @@ export class WaitlistsService {
     private waitlistDbService: WaitlistsDbService,
     private emailService: EmailManagementsService,
     private auditLogsService: AuditLogsService,
+    private segmentationService: WaitlistsSegmentationService,
   ) { }
 
   async create(dto: CreateWaitlistDto) {
@@ -19,7 +21,11 @@ export class WaitlistsService {
       throw new ConflictException('Email already subscribed to waitlist');
     }
 
-    const waitlist = await this.waitlistDbService.create(dto);
+    const segments = this.segmentationService.evaluateSegments(dto);
+    const waitlist = await this.waitlistDbService.create({
+      ...dto,
+      segments,
+    });
 
     const [firstName = '', ...lastNameParts] = dto.fullName.trim().split(/\s+/);
     const lastName = lastNameParts.join(' ') || '';

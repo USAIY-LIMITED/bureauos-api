@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Waitlist" ADD COLUMN     "lastSent" TIMESTAMP(3),
+ADD COLUMN     "segments" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "step" INTEGER NOT NULL DEFAULT 1;

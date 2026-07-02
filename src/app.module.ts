@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
@@ -29,6 +30,7 @@ import uploadConfig from './core/config/upload.config';
         limit: 100,
       },
     ]),
+    ScheduleModule.forRoot(),
     CoreModule,
     IamModule,
     AccountsModule,

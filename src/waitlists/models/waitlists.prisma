@@ -15,6 +15,9 @@ model Waitlist {
   companyName     String?
   rolePosition    String?
   expansionTarget String[] @default([])
+  segments        String[] @default([])
+  step            Int      @default(1)
+  lastSent        DateTime?
   biggestChallenge String
   challengeArea   String
   bosHelp         String?

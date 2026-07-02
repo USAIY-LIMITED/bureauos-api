@@ -20,12 +20,25 @@ import { Accounts } from '@app/accounts/decorators/accounts.decorator';
 import { AccountType } from '@prisma/client';
 import { ApiGatewayGuard } from '@app/core/api-gateway/guards/api-gateway.guard';
 
+import { WaitlistsOrchestrationService } from './waitlists.orchestration.service';
+
 @ApiTags('Waitlists')
 @ApiSecurity('X-API-KEY')
 @UseGuards(ApiGatewayGuard)
 @Controller({ path: 'waitlists', version: '1' })
 export class WaitlistsController {
-  constructor(private readonly waitlistsService: WaitlistsService) {}
+  constructor(
+    private readonly waitlistsService: WaitlistsService,
+    private readonly orchestrationService: WaitlistsOrchestrationService,
+  ) {}
+
+  @Post('orchestrate')
+  @Accounts(AccountType.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Manually trigger waitlist email orchestration' })
+  orchestrate() {
+    return this.orchestrationService.orchestrate();
+  }
 
   @Public()
   @Post()

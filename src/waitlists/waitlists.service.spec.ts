@@ -5,6 +5,7 @@ import { EmailManagementsService } from '@app/email-managements/email-management
 import { AuditLogsService } from '@app/core/audit-logs/audit-logs.service';
 import { ConflictException } from '@nestjs/common';
 import { WaitlistAccountType } from '@prisma/client';
+import { WaitlistsSegmentationService } from './waitlists.segmentation.service';
 
 const mockWaitlistsDb = {
   findFirst: jest.fn(),
@@ -21,6 +22,10 @@ const mockAuditLogs = {
   log: jest.fn().mockResolvedValue({}),
 };
 
+const mockSegmentation = {
+  evaluateSegments: jest.fn().mockReturnValue([]),
+};
+
 describe('WaitlistsService', () => {
   let service: WaitlistsService;
 
@@ -31,6 +36,7 @@ describe('WaitlistsService', () => {
     mockWaitlistsDb.create.mockReset();
     mockWaitlistsDb.findAll.mockReset();
     mockWaitlistsDb.update.mockReset();
+    mockSegmentation.evaluateSegments.mockReset().mockReturnValue([]);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -38,6 +44,7 @@ describe('WaitlistsService', () => {
         { provide: WaitlistsDbService, useValue: mockWaitlistsDb },
         { provide: EmailManagementsService, useValue: mockEmail },
         { provide: AuditLogsService, useValue: mockAuditLogs },
+        { provide: WaitlistsSegmentationService, useValue: mockSegmentation },
       ],
     }).compile();
 
