@@ -26,7 +26,6 @@ describe('WaitlistsSegmentationService', () => {
       expansionTarget: ['UK', 'United States'],
       biggestChallenge: 'None',
       challengeArea: 'None',
-      wantsNewsletter: true,
     });
     expect(segments).toContain('ng_uk_founder');
   });
@@ -40,7 +39,6 @@ describe('WaitlistsSegmentationService', () => {
       expansionTarget: ['Qatar'],
       biggestChallenge: 'None',
       challengeArea: 'None',
-      wantsNewsletter: true,
     });
     expect(segments).toContain('qatar_interested');
     expect(segments).not.toContain('ng_uk_founder');
@@ -55,7 +53,6 @@ describe('WaitlistsSegmentationService', () => {
       expansionTarget: ['UK'],
       biggestChallenge: 'None',
       challengeArea: 'None',
-      wantsNewsletter: true,
     });
     expect(segments).toContain('ecosystem_partner');
     expect(segments).not.toContain('ng_uk_founder'); // since it is Professional, not Founder
@@ -70,7 +67,6 @@ describe('WaitlistsSegmentationService', () => {
       expansionTarget: [],
       biggestChallenge: 'None',
       challengeArea: 'None',
-      wantsNewsletter: true,
     });
     expect(segments).toContain('local_focus');
   });

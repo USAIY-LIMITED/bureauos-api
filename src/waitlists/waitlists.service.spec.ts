@@ -67,7 +67,6 @@ describe('WaitlistsService', () => {
       accountType: WaitlistAccountType.Founder,
       biggestChallenge: 'Finding early customers',
       challengeArea: 'Business Development',
-      wantsNewsletter: true,
       expansionTarget: ['United Kingdom', 'Saudi Arabia'],
     };
 

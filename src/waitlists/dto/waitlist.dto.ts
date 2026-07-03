@@ -68,12 +68,9 @@ export class CreateWaitlistDto {
   @IsOptional()
   bosHelp?: string;
 
-  @ApiProperty()
-  @IsBoolean()
-  wantsNewsletter: boolean;
-
   @ApiProperty({ required: false, default: true })
   @IsBoolean()
   @IsOptional()
   subscribed_for_waitlist?: boolean;
 }
+
