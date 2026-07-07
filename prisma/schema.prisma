@@ -44,7 +44,6 @@ deletedAt DateTime?
   biggestChallenge String
   challengeArea   String
   bosHelp         String?
-  wantsNewsletter Boolean
   subscribed_for_waitlist Boolean @default(true)
 
   @@index([email, accountType])
