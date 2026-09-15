@@ -435,6 +435,37 @@ deletedAt DateTime?
 }
 
 
+// FROM: src/badges/models/badges.prisma
+model BadgeDefinition {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  slug          String         @unique
+  track         String
+  tier          String         @default("none")
+  cap           Int?
+  accountBadges AccountBadge[]
+}
+
+model AccountBadge {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  accountId    Int
+  account      Account         @relation("AccountBadges", fields: [accountId], references: [id], onDelete: Cascade)
+  badgeSlug    String
+  badge        BadgeDefinition @relation(fields: [badgeSlug], references: [slug])
+  earnedAt     DateTime        @default(now())
+  revokedAt    DateTime?
+  serialNumber Int?
+
+  @@unique([accountId, badgeSlug])
+  @@index([badgeSlug])
+}
+
+
 // FROM: src/accounts/models/verificationCode.prisma
 model VerificationCode {
 id          Int      @id @default(autoincrement())
@@ -528,7 +559,8 @@ deletedAt DateTime?
   uploadedDocumentVersions        DocumentVersion[]    @relation("DocumentVersionUploadedBy")
   documentComments                DocumentComment[]    @relation("DocumentCommentAuthor")
   documentActivities              DocumentActivity[]   @relation("DocumentActivityActor")
-  
+  badges                          AccountBadge[]       @relation("AccountBadges")
+
   identityCode       String?
 
   @@index([type])

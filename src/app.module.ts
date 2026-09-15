@@ -14,6 +14,7 @@ import { BlogModule } from './blog/blog.module';
 import { DocumentHubModule } from './document-hub/document-hub.module';
 import { RegulatoryKbModule } from './regulatory-kb/regulatory-kb.module';
 import { BusinessEntitiesModule } from './business-entities/business-entities.module';
+import { BadgesModule } from './badges/badges.module';
 
 import appConfig from './core/config/app.config';
 import mailConfig from './core/config/mail.config';
@@ -43,6 +44,7 @@ import uploadConfig from './core/config/upload.config';
     DocumentHubModule,
     RegulatoryKbModule,
     BusinessEntitiesModule,
+    BadgesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

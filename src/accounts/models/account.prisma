@@ -22,7 +22,8 @@ model Account {
   uploadedDocumentVersions        DocumentVersion[]    @relation("DocumentVersionUploadedBy")
   documentComments                DocumentComment[]    @relation("DocumentCommentAuthor")
   documentActivities              DocumentActivity[]   @relation("DocumentActivityActor")
-  
+  badges                          AccountBadge[]       @relation("AccountBadges")
+
   identityCode       String?
 
   @@index([type])
