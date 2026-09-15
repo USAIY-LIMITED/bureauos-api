@@ -12,6 +12,8 @@ import { WaitlistsModule } from './waitlists/waitlists.module';
 import { EmailManagementsModule } from './email-managements/email-managements.module';
 import { BlogModule } from './blog/blog.module';
 import { DocumentHubModule } from './document-hub/document-hub.module';
+import { RegulatoryKbModule } from './regulatory-kb/regulatory-kb.module';
+import { BusinessEntitiesModule } from './business-entities/business-entities.module';
 
 import appConfig from './core/config/app.config';
 import mailConfig from './core/config/mail.config';
@@ -39,6 +41,8 @@ import uploadConfig from './core/config/upload.config';
     EmailManagementsModule,
     BlogModule,
     DocumentHubModule,
+    RegulatoryKbModule,
+    BusinessEntitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

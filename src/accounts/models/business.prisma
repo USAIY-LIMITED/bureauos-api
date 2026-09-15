@@ -6,7 +6,9 @@ model Business {
   jurisdiction        String?
   registrationNumber String?
   businessType        String?
-  
+
+  entities BusinessEntity[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?

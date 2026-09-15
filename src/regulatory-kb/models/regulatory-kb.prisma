@@ -1,0 +1,72 @@
+enum JurisdictionCode {
+  NG
+  UK
+  AE
+  QA
+  US_DE
+}
+
+enum ProposalStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  MERGED
+}
+
+model RegulatoryProcess {
+  ...boilerplate
+  jurisdiction    JurisdictionCode
+  slug            String            @unique
+  title           String
+  description     String
+  activeVersionId Int?
+  activeVersion   ProcessVersion?   @relation("ActiveVersion", fields: [activeVersionId], references: [id])
+  versions        ProcessVersion[]  @relation("ProcessHistory")
+  proposals       ProcessProposal[]
+
+  @@index([jurisdiction])
+}
+
+model ProcessVersion {
+  ...boilerplate
+  processId            Int
+  process              RegulatoryProcess  @relation("ProcessHistory", fields: [processId], references: [id], onDelete: Cascade)
+  versionNumber        String
+  changelog            String
+  publishedByAccountId Int
+  isCurrent            Boolean            @default(false)
+  steps                ProcessStep[]
+  activeForProcesses   RegulatoryProcess[] @relation("ActiveVersion")
+
+  @@index([processId])
+}
+
+model ProcessStep {
+  ...boilerplate
+  versionId         Int
+  version           ProcessVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  stepOrder         Int
+  title             String
+  description       String
+  estimatedDays     Int
+  statutoryFeeNaira Float?
+  statutoryFeeUsd   Float?
+  requiredDocs      String[]       @default([])
+
+  @@index([versionId])
+}
+
+model ProcessProposal {
+  ...boilerplate
+  processId           Int
+  process             RegulatoryProcess @relation(fields: [processId], references: [id])
+  proposedByAccountId Int
+  status              ProposalStatus    @default(PENDING_REVIEW)
+  proposedChanges     Json
+  reasoning           String
+  reviewedByAccountId Int?
+  reviewNotes         String?
+
+  @@index([processId])
+  @@index([status])
+}

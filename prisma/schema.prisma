@@ -76,6 +76,93 @@ deletedAt DateTime?
 }
 
 
+// FROM: src/regulatory-kb/models/regulatory-kb.prisma
+enum JurisdictionCode {
+  NG
+  UK
+  AE
+  QA
+  US_DE
+}
+
+enum ProposalStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  MERGED
+}
+
+model RegulatoryProcess {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  jurisdiction    JurisdictionCode
+  slug            String            @unique
+  title           String
+  description     String
+  activeVersionId Int?
+  activeVersion   ProcessVersion?   @relation("ActiveVersion", fields: [activeVersionId], references: [id])
+  versions        ProcessVersion[]  @relation("ProcessHistory")
+  proposals       ProcessProposal[]
+
+  @@index([jurisdiction])
+}
+
+model ProcessVersion {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  processId            Int
+  process              RegulatoryProcess  @relation("ProcessHistory", fields: [processId], references: [id], onDelete: Cascade)
+  versionNumber        String
+  changelog            String
+  publishedByAccountId Int
+  isCurrent            Boolean            @default(false)
+  steps                ProcessStep[]
+  activeForProcesses   RegulatoryProcess[] @relation("ActiveVersion")
+
+  @@index([processId])
+}
+
+model ProcessStep {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  versionId         Int
+  version           ProcessVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  stepOrder         Int
+  title             String
+  description       String
+  estimatedDays     Int
+  statutoryFeeNaira Float?
+  statutoryFeeUsd   Float?
+  requiredDocs      String[]       @default([])
+
+  @@index([versionId])
+}
+
+model ProcessProposal {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  processId           Int
+  process             RegulatoryProcess @relation(fields: [processId], references: [id])
+  proposedByAccountId Int
+  status              ProposalStatus    @default(PENDING_REVIEW)
+  proposedChanges     Json
+  reasoning           String
+  reviewedByAccountId Int?
+  reviewNotes         String?
+
+  @@index([processId])
+  @@index([status])
+}
+
+
 // FROM: src/email-managements/models/email-templates.prisma
 model EmailTemplate {
   subject String
@@ -282,6 +369,44 @@ deletedAt DateTime?
 }
 
 
+// FROM: src/business-entities/models/business-entity.prisma
+enum EntityStatusTrack {
+  EXISTING_COMPANY
+  DREAM_COMPANY
+}
+
+enum IncorporationStatus {
+  PRE_INCORPORATION
+  PENDING_SUBMISSION
+  INCORPORATED
+  DISSOLVED
+}
+
+model BusinessEntity {
+  id          Int      @id @default(autoincrement())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+deletedAt DateTime?
+  businessAccountId   Int
+  business            Business             @relation(fields: [businessAccountId], references: [accountId], onDelete: Cascade)
+  name                String
+  statusTrack         EntityStatusTrack
+  incorporationStatus IncorporationStatus  @default(PRE_INCORPORATION)
+
+  rcNumber            String?
+  tinNumber           String?
+  incorporationDate   DateTime?
+  complianceScore     Int                  @default(100)
+
+  proposedNames       String[]             @default([])
+  targetJurisdictions String[]             @default([])
+  shareCapital        Float?
+  industrySector      String?
+
+  @@index([businessAccountId])
+}
+
+
 // FROM: src/blog/models/blog-post.prisma
 enum BlogPostStatus {
   DRAFT
@@ -353,7 +478,9 @@ model Business {
   jurisdiction        String?
   registrationNumber String?
   businessType        String?
-  
+
+  entities BusinessEntity[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?

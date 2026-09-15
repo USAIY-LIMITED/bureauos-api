@@ -1,0 +1,32 @@
+enum EntityStatusTrack {
+  EXISTING_COMPANY
+  DREAM_COMPANY
+}
+
+enum IncorporationStatus {
+  PRE_INCORPORATION
+  PENDING_SUBMISSION
+  INCORPORATED
+  DISSOLVED
+}
+
+model BusinessEntity {
+  ...boilerplate
+  businessAccountId   Int
+  business            Business             @relation(fields: [businessAccountId], references: [accountId], onDelete: Cascade)
+  name                String
+  statusTrack         EntityStatusTrack
+  incorporationStatus IncorporationStatus  @default(PRE_INCORPORATION)
+
+  rcNumber            String?
+  tinNumber           String?
+  incorporationDate   DateTime?
+  complianceScore     Int                  @default(100)
+
+  proposedNames       String[]             @default([])
+  targetJurisdictions String[]             @default([])
+  shareCapital        Float?
+  industrySector      String?
+
+  @@index([businessAccountId])
+}
