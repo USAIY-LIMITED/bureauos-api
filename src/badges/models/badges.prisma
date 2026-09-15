@@ -1,0 +1,22 @@
+model BadgeDefinition {
+  ...boilerplate
+  slug          String         @unique
+  track         String
+  tier          String         @default("none")
+  cap           Int?
+  accountBadges AccountBadge[]
+}
+
+model AccountBadge {
+  ...boilerplate
+  accountId    Int
+  account      Account         @relation("AccountBadges", fields: [accountId], references: [id], onDelete: Cascade)
+  badgeSlug    String
+  badge        BadgeDefinition @relation(fields: [badgeSlug], references: [slug])
+  earnedAt     DateTime        @default(now())
+  revokedAt    DateTime?
+  serialNumber Int?
+
+  @@unique([accountId, badgeSlug])
+  @@index([badgeSlug])
+}
